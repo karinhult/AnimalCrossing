@@ -29,6 +29,14 @@ def updateSugarArenaPois(N, positions, sugarArena, g, growthRate, sugar_max):
                 sugarArena_updated[i,j] = 0.0
             elif sugarArena_updated[i,j] < sugar_max[i,j]:
                 sugarArena_updated[i,j] += g
+
+    globalSugarList_x = np.where(sugarArena != 0)[0].reshape((-1, 1))
+    globalSugarList_y = np.where(sugarArena != 0)[1].reshape((-1, 1))
+    globalSugarList = np.concatenate((globalSugarList_x, globalSugarList_y), 1)
+
+    sugarAndAgent = np.intersect2d(positions, globalSugarList)
+    sugarArena_updated[sugarAndAgent] = 0
+
     return sugarArena_updated
 
 def updateSugarLevels(positions, sugarlevels, metabolisms, visions, sugarArena):
@@ -142,6 +150,7 @@ for t in range(500):
     tk.title('time' + str(t))
     time.sleep(1/100)
     tk.update()
+
     sugarArena_t = updateSugarArenaPois(L, positions_t, sugarArena_t, g, growthRate, sugar_max)
 
 Tk.mainloop(canvas)
