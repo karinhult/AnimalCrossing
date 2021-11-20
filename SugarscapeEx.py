@@ -5,6 +5,7 @@ from PIL import Image
 from PIL import ImageTk as itk
 from copy import deepcopy
 import time
+import random as rnd
 
 def updateSugarArena(N, positions, sugarArena, g, sugar_max):
     sugarArena_updated = deepcopy(sugarArena)
@@ -14,6 +15,20 @@ def updateSugarArena(N, positions, sugarArena, g, sugar_max):
                 sugarArena_updated[i, j] = 0.0
             elif sugarArena_updated[i,j] < sugar_max[i, j]:
                 sugarArena_updated[i, j] += g
+    return sugarArena_updated
+
+def updateSugarArenaPois(N, positions, sugarArena, g, growthRate, sugar_max):
+    sugarArena_updated = deepcopy(sugarArena)
+    nNewSugarPoints = np.random.poisson(growthRate)
+    newSugarX = rnd.sample(range(N), nNewSugarPoints)
+    newSugarY = rnd.sample(range(N), nNewSugarPoints)
+
+    for i in newSugarY:
+        for j in newSugarX:
+            if [i,j] in positions.tolist():
+                sugarArena_updated = 0.0
+            elif sugarArena_updated[i,j] < sugar_max[i,j]:
+                sugarArena_updated[i,j] += g
     return sugarArena_updated
 
 def updateSugarLevels(positions, sugarlevels, metabolisms, velocities, sugarArena):
@@ -55,6 +70,7 @@ def updatePositions(A, N, positions, velocities, sugarArena):
             positions_updated[a,:] += notSugarList[np.random.randint(0, int(n))]
     return positions_updated
 def initializeSugarArena(N, plantProb, globalSugarMax):
+    # For later: have different maximum sugar in different parts of the board?
     sugarArena = rnd.randint(1,globalSugarMax, (N,N)) * (np.rand(N,N) < plantProb)
     return sugarArena
 
