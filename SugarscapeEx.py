@@ -38,44 +38,39 @@ def updateSugarLevels(positions, sugarlevels, metabolisms, velocities, sugarAren
     survivors = np.where(sugarLevels_updated > 0)[0]
     return positions[survivors,:], velocities[survivors], metabolisms[survivors], sugarLevels_updated[survivors]
 
-def updatePositions(A, N, positions, velocities, sugarArena):
-    positions_updated = deepcopy(positions)
+def updatePositions(A, L, positions, velocities, sugarArena):
+    positions_updated = np.copy(positions)
+
+    globalSugarList_x = np.where(sugarArena != 0)[0].reshape((-1,1))
+    globalSugarList_y = np.where(sugarArena != 0)[1].reshape((-1,1))
+    globalSugarList = np.concatenate((globalSugarList_x, globalSugarList_y), 1)
     for a in range(A):
-        sugarList = []
-        notSugarList = []
-        for i in range(-int(velocities[a]), int(velocities[a]) + 1):
-            ipos = positions[a, 0] + i
-            jpos = positions[a, 1]
-            if [ipos, jpos] not in positions_updated.tolist() and ipos >= 0 and ipos < N:
-                if sugarArena[ipos, jpos] > 0:
-                    sugarList.append(np.array([i, 0]))
-                else:
-                    notSugarList.append(np.array([i, 0]))
-
-        for j in range(-int(velocities[a]), int(velocities[a]) + 1):
-            ipos = positions[a, 0]
-            jpos = positions[a, 1] + j
-            if [ipos, jpos] not in positions_updated.tolist() and jpos >= 0 and jpos < N:
-                if sugarArena[ipos, jpos] > 0:
-                    sugarList.append(np.array([0, j]))
-                else:
-                    notSugarList.append(np.array([0, j]))
-
-
-        if sugarList != []:
-            n = len(sugarList)
-            positions_updated[a,:] += sugarList[np.random.randint(0, int(n))]
-        elif notSugarList != []:
-            n = len(notSugarList)
-            positions_updated[a,:] += notSugarList[np.random.randint(0, int(n))]
+        distance = np.linalg.norm(positions[a,:] - globalSugarList[:,:], axis=1)
+        iSugarList = np.where(distance <= velocities[a])[0]
+        nSugarPossibilities = iSugarList.shape[0]
+        if nSugarPossibilities > 0:
+            positions_updated[a,:] = globalSugarList[rnd.choice(iSugarList),:]
+        else:
+            outsideArena = True
+            while outsideArena:
+                v = np.random.uniform(0, velocities[a])
+                theta = np.random.uniform(0, 2*np.pi)
+                velocity = np.array([np.rint(v*np.cos(theta)), np.rint(v*np.sin(theta))])
+                newPosition = positions_updated[a,:] + velocity
+                if newPosition[0] >= 0 and newPosition[0] < L and newPosition[1] >= 0 and newPosition[1] < L and np.linalg.norm(velocity, axis=0) <= velocities[a]:
+                    positions_updated[a, :] = newPosition
+                    outsideArena = False
     return positions_updated
+
 def initializeSugarArena(N, plantProb, globalSugarMax):
-    # For later: have different maximum sugar in different parts of the board?
-    sugarArena = rnd.randint(1,globalSugarMax, (N,N)) * (np.rand(N,N) < plantProb)
+    sugarArena = np.random.randint(1,globalSugarMax, size=(N,N)) * (np.random.rand(N,N) < plantProb)
     return sugarArena
 
-def addRoad(pos, width, sugarArena):
-    #doesn't do anything yet  
+#Adds road
+def addRoad(pos, width, sugarArena, undesirability):
+    j1 = int(pos-width/2)
+    j2 = int(pos+width/2)
+    sugarArena[:,j1:j2] = undesirability
     return sugarArena
 
 class Prey:
@@ -84,17 +79,17 @@ class Prey:
         self.metab = metabolism
         self.food = sugarLevel
         self.pos = pos
-        
+
     def getVision(self):
         return self.vision
-        
+
     def eat(self, food):
         self.food = self.food + food - self.metab
         return self.food
-        
+
     def setPos(self, x):
         self.pos = x
-            
+
     def getPos(self):
         return self.Pos
 
@@ -103,7 +98,7 @@ def initializePrey(A, N, v_min, v_max, m_min, m_max, s_min, s_max):
     visions = np.random.randint(v_min, v_max+1, (A, 1))
     metabolisms = np.random.randint(m_min, m_max+1, (A, 1)).astype(float)
     sugarlevels = np.random.randint(s_min, s_max+1, (A, 1)).astype(float)
-    
+
     #preys = [Prey(visions[i], metabolisms[i], sugarlevels[i], positions[i]) for i in range(A)]
     #can return prey and positions? if we want that
     return positions, velocities, metabolisms, sugarlevels
