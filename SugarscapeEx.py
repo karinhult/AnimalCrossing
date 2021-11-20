@@ -54,8 +54,9 @@ def updatePositions(A, N, positions, velocities, sugarArena):
             n = len(notSugarList)
             positions_updated[a,:] += notSugarList[np.random.randint(0, int(n))]
     return positions_updated
+
 def initializeSugarArena(N, plantProb, globalSugarMax):
-    sugarArena = rnd.randint(1,globalSugarMax, (N,N)) * (np.rand(N,N) < plantProb)
+    sugarArena = np.random.randint(1,globalSugarMax, size=(N,N)) * (np.random.rand(N,N) < plantProb)
     return sugarArena
 
 def addRoad(pos, width, sugarArena):
