@@ -16,20 +16,12 @@ def updateSugarArena(N, positions, sugarArena, g, sugar_max):
                 sugarArena_updated[i, j] += g
     return sugarArena_updated
 
-def updateSugarLevels(A, positions, sugarlevels, metabolisms, velocities, sugarArena):
-    sugarlevels_updated = deepcopy(sugarlevels)
-    deadList = []
-    for a in range(A):
-        sugarInCell = sugarArena[positions[a,0], positions[a,1]]
-        sugarlevels_updated[a] += sugarInCell - metabolisms[a]
-        if sugarlevels_updated[a] < 0:
-            deadList.append(a)
-
-    positions = np.delete(positions, deadList, 0)
-    sugarlevels_updated = np.delete(sugarlevels_updated, deadList, 0)
-    metabolisms = np.delete(metabolisms, deadList, 0)
-    velocities = np.delete(velocities, deadList, 0)
-    return positions, velocities, metabolisms, sugarlevels_updated
+def updateSugarLevels(positions, sugarlevels, metabolisms, velocities, sugarArena):
+    sugarLevels_updated = np.copy(sugarlevels)
+    sugarInCell = np.reshape(sugarArena[(positions[:,0], positions[:,1])], (-1, 1))
+    sugarLevels_updated += sugarInCell - metabolisms
+    survivors = np.where(sugarLevels_updated > 0)[0]
+    return positions[survivors,:], velocities[survivors], metabolisms[survivors], sugarLevels_updated[survivors]
 
 def updatePositions(A, N, positions, velocities, sugarArena):
     positions_updated = deepcopy(positions)
@@ -121,7 +113,7 @@ sugarlevels_t = deepcopy(sugarlevels_0)
 #plt.show()
 for t in range(500):
     positions_t = updatePositions(A, N, positions_t, velocities, sugarArena_t)
-    positions_t, velocities, metabolisms, sugarlevels_t = updateSugarLevels(A, positions_t, sugarlevels_t, metabolisms, velocities, sugarArena_t)
+    positions_t, velocities, metabolisms, sugarlevels_t = updateSugarLevels(positions_t, sugarlevels_t, metabolisms, velocities, sugarArena_t)
     A = len(sugarlevels_t)
     A_list[t+1] = A
 
