@@ -138,7 +138,7 @@ g = 1
 sugarArena_0 = initializeSugarArena(N, plantProb, globalSugarMax)
 sugar_max = deepcopy(sugarArena_0)
 sugarArena_t = deepcopy(sugarArena_0)
-positions_0, velocities, metabolisms, sugarlevels_0 = initializePopulation(A, N, v_min, v_max, m_min, m_max, s_min, s_max)
+positions_0, velocities, metabolisms, sugarlevels_0 = initializePrey(A, N, v_min, v_max, m_min, m_max, s_min, s_max)
 positions_t = deepcopy(positions_0)
 sugarlevels_t = deepcopy(sugarlevels_0)
 
