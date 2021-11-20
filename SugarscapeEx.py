@@ -31,8 +31,7 @@ def updateSugarArenaPois(N, positions, sugarArena, g, growthRate, sugar_max):
     globalSugarList_y = np.where(sugarArena != 0)[1].reshape((-1, 1))
     globalSugarList = np.concatenate((globalSugarList_x, globalSugarList_y), 1)
 
-    sugarAndAgent = np.intersect2d(positions, globalSugarList)
-    sugarArena_updated[sugarAndAgent] = 0
+    sugarArena_updated[positions] = 0
 
     return sugarArena_updated
 
@@ -91,11 +90,15 @@ def initializePrey(A, N, v_min, v_max, m_min, m_max, s_min, s_max):
     #can return prey and positions? if we want that
     return positions, visions, metabolisms, sugarlevels
 
-def getImage(positions, sugarArena, A):
-    image = 255 - sugarArena * 40
+def getImage(positions, sugarArena, A, globalSugarMax):
+    width = np.shape(sugarArena)[0]
+    image = np.zeros((50, 50, 3))
+    image[:,:,1] = 255
+    image[:,:,2] = (sugarArena * 255/globalSugarMax).astype(int)
     for a in range(A):
-        image[int(positions[a,0]), int(positions[a,1])] = 0
-    return np.transpose(image)
+        image[int(positions[a,0]), int(positions[a,1]), 0] = 255
+        image[int(positions[a,0]), int(positions[a,1]), 1:3] = 0
+    return np.transpose(image, (1, 0, 2))
 
 res = 500  # Animation resolution
 tk = Tk()
@@ -141,14 +144,16 @@ for t in range(500):
     A = len(sugarlevels_t)
     A_list[t+1] = A
 
-    image = getImage(positions_t, sugarArena_t, A)
-    img = itk.PhotoImage(Image.fromarray(np.uint8(image)).resize((res, res), resample=Image.BOX))
+    image = getImage(positions_t, sugarArena_t, A, globalSugarMax)
+    img = itk.PhotoImage(Image.fromarray(np.uint8(image),'RGB').resize((res, res), resample=Image.BOX))
     canvas.create_image(0, 0, anchor=NW, image=img)
     tk.title('time' + str(t))
     time.sleep(1/100)
     tk.update()
 
     sugarArena_t = updateSugarArenaPois(L, positions_t, sugarArena_t, g, growthRate, sugar_max)
+
+    time.sleep(.3)
 
 Tk.mainloop(canvas)
 
