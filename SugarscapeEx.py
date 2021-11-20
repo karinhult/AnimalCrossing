@@ -16,20 +16,12 @@ def updateSugarArena(N, positions, sugarArena, g, sugar_max):
                 sugarArena_updated[i, j] += g
     return sugarArena_updated
 
-def updateSugarLevels(A, positions, sugarlevels, metabolisms, velocities, sugarArena):
-    sugarlevels_updated = deepcopy(sugarlevels)
-    deadList = []
-    for a in range(A):
-        sugarInCell = sugarArena[positions[a,0], positions[a,1]]
-        sugarlevels_updated[a] += sugarInCell - metabolisms[a]
-        if sugarlevels_updated[a] < 0:
-            deadList.append(a)
-
-    positions = np.delete(positions, deadList, 0)
-    sugarlevels_updated = np.delete(sugarlevels_updated, deadList, 0)
-    metabolisms = np.delete(metabolisms, deadList, 0)
-    velocities = np.delete(velocities, deadList, 0)
-    return positions, velocities, metabolisms, sugarlevels_updated
+def updateSugarLevels(positions, sugarlevels, metabolisms, velocities, sugarArena):
+    sugarLevels_updated = np.copy(sugarlevels)
+    sugarInCell = np.reshape(sugarArena[(positions[:,0], positions[:,1])], (-1, 1))
+    sugarLevels_updated += sugarInCell - metabolisms
+    survivors = np.where(sugarLevels_updated > 0)[0]
+    return positions[survivors,:], velocities[survivors], metabolisms[survivors], sugarLevels_updated[survivors]
 
 def updatePositions(A, N, positions, velocities, sugarArena):
     positions_updated = deepcopy(positions)
@@ -63,20 +55,42 @@ def updatePositions(A, N, positions, velocities, sugarArena):
             positions_updated[a,:] += notSugarList[np.random.randint(0, int(n))]
     return positions_updated
 
-def initializeSugarArena(N, radius_inner, pos1, pos2, globalSugarMax):
-    sugarArena = np.zeros((N,N))
-    for i in range(N):
-        for j in range(N):
-            for s in range(1, globalSugarMax + 1):
-                if ((pos1[0] - i)**2 + (pos1[1] - j)**2 < radius_inner * s) or ((pos2[0] - i)**2 + (pos2[1] - j)**2 < radius_inner * s):
-                    sugarArena[i,j] += 1
+def initializeSugarArena(N, plantProb, globalSugarMax):
+    sugarArena = np.random.randint(1,globalSugarMax, size=(N,N)) * (np.random.rand(N,N) < plantProb)
     return sugarArena
 
-def initializePopulation(A, N, v_min, v_max, m_min, m_max, s_min, s_max):
+def addRoad(pos, width, sugarArena):
+    #doesn't do anything yet  
+    return sugarArena
+
+class Prey:
+    def __init__(self, vision, metabolism, sugarLevel, pos):
+        self.vision = vision
+        self.metab = metabolism
+        self.food = sugarLevel
+        self.pos = pos
+        
+    def getVision(self):
+        return self.vision
+        
+    def eat(self, food):
+        self.food = self.food + food - self.metab
+        return self.food
+        
+    def setPos(self, x):
+        self.pos = x
+            
+    def getPos(self):
+        return self.Pos
+
+def initializePrey(A, N, v_min, v_max, m_min, m_max, s_min, s_max):
     positions = np.random.randint(0, N, (A, 2))
-    velocities = np.random.randint(v_min, v_max+1, (A, 1))
+    visions = np.random.randint(v_min, v_max+1, (A, 1))
     metabolisms = np.random.randint(m_min, m_max+1, (A, 1)).astype(float)
     sugarlevels = np.random.randint(s_min, s_max+1, (A, 1)).astype(float)
+    
+    #preys = [Prey(visions[i], metabolisms[i], sugarlevels[i], positions[i]) for i in range(A)]
+    #can return prey and positions? if we want that
     return positions, velocities, metabolisms, sugarlevels
 
 def getImage(positions, sugarArena, A):
@@ -98,6 +112,7 @@ ccolor = ['#0008FF', '#DB0000', '#12F200']
 #rest = Button(tk, text='Restart', command=restart)
 #rest.place(relx=0.05, rely=.85, relheight=0.12, relwidth=0.15)
 
+plantProb = 0.5
 N = 50
 A = 400
 A_list = np.zeros(501)
@@ -110,7 +125,7 @@ m_max = 4
 s_min = 5
 s_max = 25
 g = 1
-sugarArena_0 = initializeSugarArena(N, round(N*3/4,0), np.array([round(N/3.5,0), round(N/3.5,0)]), np.array([N-round(N/3.5,0), N-round(N/3.5,0)]), globalSugarMax)
+sugarArena_0 = initializeSugarArena(N, plantProb, globalSugarMax)
 sugar_max = deepcopy(sugarArena_0)
 sugarArena_t = deepcopy(sugarArena_0)
 positions_0, velocities, metabolisms, sugarlevels_0 = initializePopulation(A, N, v_min, v_max, m_min, m_max, s_min, s_max)
@@ -121,7 +136,7 @@ sugarlevels_t = deepcopy(sugarlevels_0)
 #plt.show()
 for t in range(500):
     positions_t = updatePositions(A, N, positions_t, velocities, sugarArena_t)
-    positions_t, velocities, metabolisms, sugarlevels_t = updateSugarLevels(A, positions_t, sugarlevels_t, metabolisms, velocities, sugarArena_t)
+    positions_t, velocities, metabolisms, sugarlevels_t = updateSugarLevels(positions_t, sugarlevels_t, metabolisms, velocities, sugarArena_t)
     A = len(sugarlevels_t)
     A_list[t+1] = A
 
