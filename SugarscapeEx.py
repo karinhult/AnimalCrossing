@@ -63,6 +63,7 @@ def updatePositions(A, L, positions, velocities, sugarArena):
     return positions_updated
 
 def initializeSugarArena(N, plantProb, globalSugarMax):
+    # For later: Add different sugar maximums in different parts of the arena?
     sugarArena = np.random.randint(1,globalSugarMax, size=(N,N)) * (np.random.rand(N,N) < plantProb)
     return sugarArena
 
