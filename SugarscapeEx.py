@@ -28,13 +28,9 @@ def updateSugarArenaPois(N, positions, sugarArena, g, growthRate, sugar_max):
     #globalSugarList_y = np.where(sugarArena != 0)[1].reshape((-1, 1))
     #globalSugarList = np.concatenate((globalSugarList_x, globalSugarList_y), 1)
 
-<<<<<<< HEAD
-    sugarArena_updated[positions] = 0
-=======
     #sugarAndAgent = np.intersect2d(positions, globalSugarList)
     #sugarArena_updated[sugarAndAgent] = 0
     sugarArena_updated[positions[:,0], positions[:,1]] = 0
->>>>>>> 5d63ff840373f0de601f31784b90264e9a7f6626
 
     return sugarArena_updated
 
@@ -96,12 +92,27 @@ def initializePrey(A, N, v_min, v_max, m_min, m_max, s_min, s_max):
 def getImage(positions, sugarArena, A, globalSugarMax):
     width = np.shape(sugarArena)[0]
     image = np.zeros((50, 50, 3))
-    image[:,:,1] = 255
-    image[:,:,2] = (sugarArena * 255/globalSugarMax).astype(int)
+    image[:,:,1] = 175 # Green grass
+    image[sugarArena > 0, :] = 0
+    image[:,:,0] = (sugarArena * 1.5*255/globalSugarMax).astype(int) # Red food
     for a in range(A):
-        image[int(positions[a,0]), int(positions[a,1]), 0] = 255
-        image[int(positions[a,0]), int(positions[a,1]), 1:3] = 0
+        image[int(positions[a,0]), int(positions[a,1]), :] = 255 # White agents
+    # breakpoint()
     return np.transpose(image, (1, 0, 2))
+
+imageDelay = 0.2
+def changeImageDelay(increase=True):
+    global imageDelay
+    if increase:
+        if imageDelay == 0.01:
+            imageDelay = 0.1
+        else:
+            imageDelay += 0.1
+    else:
+        imageDelay = max(0.01, imageDelay-0.1)
+    currentDelay.delete('1.0', 'end')
+    currentDelay.insert(END, f'Current delay: {"{0:.2g}".format(imageDelay)}')
+    currentDelay.tag_add("center", "1.0", "end")
 
 res = 500  # Animation resolution
 tk = Tk()
@@ -113,8 +124,15 @@ tk.attributes('-topmost', 0)
 canvas.place(x=res / 20, y=res / 20, height=res, width=res)
 ccolor = ['#0008FF', '#DB0000', '#12F200']
 
-#rest = Button(tk, text='Restart', command=restart)
-#rest.place(relx=0.05, rely=.85, relheight=0.12, relwidth=0.15)
+currentDelay = Text(tk)
+currentDelay.tag_configure("center", justify='center')
+currentDelay.insert('1.0', f'Current delay: {imageDelay}')
+currentDelay.tag_add("center", "1.0", "end")
+currentDelay.place(relx=0.05, rely=.81, relheight=0.04, relwidth=0.3)
+speedUp = Button(tk, text='Speed up', command=lambda: changeImageDelay(False))
+speedUp.place(relx=0.05, rely=.85, relheight=0.12, relwidth=0.15)
+speedDn = Button(tk, text='Speed down', command=changeImageDelay)
+speedDn.place(relx=0.2, rely=.85, relheight=0.12, relwidth=0.15)
 
 plantProb = 0.5
 L = 50
@@ -129,7 +147,7 @@ m_max = 4
 s_min = 5
 s_max = 25
 g = 1
-growthRate = 100
+growthRate = 25
 
 sugarArena_0 = initializeSugarArena(L, plantProb, globalSugarMax)
 sugar_max = np.ones([L,L])*globalSugarMax
@@ -151,15 +169,12 @@ for t in range(500):
     img = itk.PhotoImage(Image.fromarray(np.uint8(image),'RGB').resize((res, res), resample=Image.BOX))
     canvas.create_image(0, 0, anchor=NW, image=img)
     tk.title('time' + str(t))
-    time.sleep(1/100)
+    time.sleep(imageDelay)
     tk.update()
 
     sugarArena_t = updateSugarArenaPois(L, positions_t, sugarArena_t, g, growthRate, sugar_max)
 
-    time.sleep(.3)
-
 Tk.mainloop(canvas)
 
-
-plt.plot(range(0,501), A_list)
-plt.show()
+# plt.plot(A_list)
+# plt.show()
