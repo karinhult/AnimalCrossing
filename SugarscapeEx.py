@@ -96,7 +96,7 @@ class Prey:
 
 def initializePrey(A, N, v_min, v_max, m_min, m_max, s_min, s_max):
     positions = np.random.randint(0, N, (A, 2))
-    visions = np.random.randint(v_min, v_max+1, (A, 1))
+    velocities = np.random.randint(v_min, v_max+1, (A, 1))
     metabolisms = np.random.randint(m_min, m_max+1, (A, 1)).astype(float)
     sugarlevels = np.random.randint(s_min, s_max+1, (A, 1)).astype(float)
 
