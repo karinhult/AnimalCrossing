@@ -25,10 +25,7 @@ def updateSugarArenaPois(N, positions, sugarArena, g, growthRate, sugar_max):
 
     for i in newSugarY:
         for j in newSugarX:
-            if [i,j] in positions.tolist():
-                sugarArena_updated[i,j] = 0.0
-            elif sugarArena_updated[i,j] < sugar_max[i,j]:
-                sugarArena_updated[i,j] += g
+            sugarArena_updated[i,j] += g
 
     globalSugarList_x = np.where(sugarArena != 0)[0].reshape((-1, 1))
     globalSugarList_y = np.where(sugarArena != 0)[1].reshape((-1, 1))
