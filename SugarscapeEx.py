@@ -20,19 +20,17 @@ def updateSugarArena(N, positions, sugarArena, g, sugar_max):
 def updateSugarArenaPois(N, positions, sugarArena, g, growthRate, sugar_max):
     sugarArena_updated = deepcopy(sugarArena)
     nNewSugarPoints = np.random.poisson(growthRate)
-    newSugarX = rnd.sample(range(N), nNewSugarPoints)
-    newSugarY = rnd.sample(range(N), nNewSugarPoints)
+    newSugarPositions = np.random.randint(0, N, size=[2, nNewSugarPoints])
 
-    for i in newSugarY:
-        for j in newSugarX:
-            sugarArena_updated[i,j] += g
+    sugarArena_updated[tuple(newSugarPositions)] += g
 
-    globalSugarList_x = np.where(sugarArena != 0)[0].reshape((-1, 1))
-    globalSugarList_y = np.where(sugarArena != 0)[1].reshape((-1, 1))
-    globalSugarList = np.concatenate((globalSugarList_x, globalSugarList_y), 1)
+    #globalSugarList_x = np.where(sugarArena != 0)[0].reshape((-1, 1))
+    #globalSugarList_y = np.where(sugarArena != 0)[1].reshape((-1, 1))
+    #globalSugarList = np.concatenate((globalSugarList_x, globalSugarList_y), 1)
 
-    sugarAndAgent = np.intersect2d(positions, globalSugarList)
-    sugarArena_updated[sugarAndAgent] = 0
+    #sugarAndAgent = np.intersect2d(positions, globalSugarList)
+    #sugarArena_updated[sugarAndAgent] = 0
+    sugarArena_updated[positions] = 0
 
     return sugarArena_updated
 
@@ -123,7 +121,7 @@ m_max = 4
 s_min = 5
 s_max = 25
 g = 1
-growthRate = 2
+growthRate = 1000
 
 sugarArena_0 = initializeSugarArena(L, plantProb, globalSugarMax)
 sugar_max = np.ones([L,L])*globalSugarMax
