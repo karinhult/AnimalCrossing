@@ -59,8 +59,11 @@ def initializeSugarArena(N, plantProb, globalSugarMax):
     sugarArena = np.random.randint(1,globalSugarMax, size=(N,N)) * (np.random.rand(N,N) < plantProb)
     return sugarArena
 
-def addRoad(pos, width, sugarArena):
-    #doesn't do anything yet  
+#Adds road
+def addRoad(pos, width, sugarArena, undesirability):
+    j1 = int(pos-width/2)
+    j2 = int(pos+width/2)
+    sugarArena[:,j1:j2] = undesirability
     return sugarArena
 
 class Prey:
