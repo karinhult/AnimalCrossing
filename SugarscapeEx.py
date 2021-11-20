@@ -17,12 +17,26 @@ def updateSugarArena(N, positions, sugarArena, g, sugar_max):
                 sugarArena_updated[i, j] += g
     return sugarArena_updated
 
-def updateSugarLevels(positions, sugarlevels, metabolisms, velocities, sugarArena):
+def updateSugarArenaPois(N, positions, sugarArena, g, growthRate, sugar_max):
+    sugarArena_updated = deepcopy(sugarArena)
+    nNewSugarPoints = np.random.poisson(growthRate)
+    newSugarX = rnd.sample(range(N), nNewSugarPoints)
+    newSugarY = rnd.sample(range(N), nNewSugarPoints)
+
+    for i in newSugarY:
+        for j in newSugarX:
+            if [i,j] in positions.tolist():
+                sugarArena_updated[i,j] = 0.0
+            elif sugarArena_updated[i,j] < sugar_max[i,j]:
+                sugarArena_updated[i,j] += g
+    return sugarArena_updated
+
+def updateSugarLevels(positions, sugarlevels, metabolisms, visions, sugarArena):
     sugarLevels_updated = np.copy(sugarlevels)
     sugarInCell = np.reshape(sugarArena[(positions[:,0], positions[:,1])], (-1, 1))
     sugarLevels_updated += sugarInCell - metabolisms
     survivors = np.where(sugarLevels_updated > 0)[0]
-    return positions[survivors,:], velocities[survivors], metabolisms[survivors], sugarLevels_updated[survivors]
+    return positions[survivors,:], visions[survivors], metabolisms[survivors], sugarLevels_updated[survivors]
 
 def updatePositions(A, L, positions, visions, sugarArena):
     positions_updated = np.copy(positions)
@@ -51,6 +65,7 @@ def updatePositions(A, L, positions, visions, sugarArena):
     return positions_updated
 
 def initializeSugarArena(L, plantProb, globalSugarMax):
+    # For later: Add different sugar maximums in different parts of the arena?
     sugarArena = np.random.randint(1,globalSugarMax, size=(L,L)) * (np.random.rand(L,L) < plantProb)
     return sugarArena
 
@@ -61,12 +76,12 @@ def addRoad(pos, width, sugarArena, undesirability):
     sugarArena[:,j1:j2] = undesirability
     return sugarArena
 
-def initializePrey(A, L, v_min, v_max, m_min, m_max, s_min, s_max):
-    positions = np.random.randint(0, L, (A, 2))
+def initializePrey(A, N, v_min, v_max, m_min, m_max, s_min, s_max):
+    positions = np.random.randint(0, N, (A, 2))
     visions = np.random.randint(v_min, v_max+1, (A, 1))
     metabolisms = np.random.randint(m_min, m_max+1, (A, 1)).astype(float)
     sugarlevels = np.random.randint(s_min, s_max+1, (A, 1)).astype(float)
-    
+
     #preys = [Prey(visions[i], metabolisms[i], sugarlevels[i], positions[i]) for i in range(A)]
     #can return prey and positions? if we want that
     return positions, visions, metabolisms, sugarlevels
@@ -103,18 +118,21 @@ m_max = 4
 s_min = 5
 s_max = 25
 g = 1
+growthRate = 2
+
 sugarArena_0 = initializeSugarArena(L, plantProb, globalSugarMax)
-sugar_max = deepcopy(sugarArena_0)
+sugar_max = np.ones([L,L])*globalSugarMax
 sugarArena_t = deepcopy(sugarArena_0)
-positions_0, velocities, metabolisms, sugarlevels_0 = initializePrey(A, L, v_min, v_max, m_min, m_max, s_min, s_max)
+positions_0, visions, metabolisms, sugarlevels_0 = initializePrey(A, L, v_min, v_max, m_min, m_max, s_min, s_max)
+
 positions_t = deepcopy(positions_0)
 sugarlevels_t = deepcopy(sugarlevels_0)
 
 #plt.pcolor(np.flip(sugarArena_0, 0))
 #plt.show()
 for t in range(500):
-    positions_t = updatePositions(A, L, positions_t, velocities, sugarArena_t)
-    positions_t, velocities, metabolisms, sugarlevels_t = updateSugarLevels(positions_t, sugarlevels_t, metabolisms, velocities, sugarArena_t)
+    positions_t = updatePositions(A, L, positions_t, visions, sugarArena_t)
+    positions_t, visions, metabolisms, sugarlevels_t = updateSugarLevels(positions_t, sugarlevels_t, metabolisms, visions, sugarArena_t)
     A = len(sugarlevels_t)
     A_list[t+1] = A
 
@@ -124,8 +142,7 @@ for t in range(500):
     tk.title('time' + str(t))
     time.sleep(1/100)
     tk.update()
-
-    sugarArena_t = updateSugarArena(L, positions_t, sugarArena_t, g, sugar_max)
+    sugarArena_t = updateSugarArenaPois(L, positions_t, sugarArena_t, g, growthRate, sugar_max)
 
 Tk.mainloop(canvas)
 
