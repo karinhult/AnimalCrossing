@@ -1,0 +1,4 @@
+22/11
+We have a functioning basic sugarscape model with one class of agent (prey) and sugar regrowth according to a spatial Poisson process.
+The current plan is to simulate a road by setting the sugar content of a number of adjecent columns to -1. This makes it easy to spot the
+road in the rest of the code, and also makes sure that agents will not want to cross it.
