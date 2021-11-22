@@ -60,7 +60,7 @@ def initializeSugarArena(L, plantProb, globalSugarMax):
     return sugarArena
 
 #Adds road
-def addRoad(pos, width, sugarArena, undesirability):
+def addRoad(pos, width, sugarArena, undesirability = -1):
     j1 = int(pos-width/2)
     j2 = int(pos+width/2)
     sugarArena[:,j1:j2] = undesirability
