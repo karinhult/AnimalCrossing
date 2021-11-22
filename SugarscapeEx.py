@@ -106,6 +106,7 @@ def getImage(positions, sugarArena, A, globalSugarMax):
     image[:,:,1] = 175 # Green grass
     image[sugarArena > 0, :] = 0
     image[:,:,0] = (sugarArena * 1.5*255/globalSugarMax).astype(int) # Red food
+    image[sugarArena < 0, :] = 75
     for a in range(A):
         image[int(positions[a,0]), int(positions[a,1]), :] = 255 # White agents
     # breakpoint()
