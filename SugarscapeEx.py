@@ -22,7 +22,7 @@ def updateSugarArena(N, positions, sugarArena, growthRate, sproutRate, sugar_max
 
 def updateSugarLevels(positions, sugarlevels, metabolisms, visions, sugarArena):
     sugarLevels_updated = np.copy(sugarlevels)
-    sugarInCell = np.reshape(sugarArena[(positions[:,0], positions[:,1])], (-1, 1))
+    sugarInCell = (sugarArena[positions[:,0], positions[:,1]])[:,np.newaxis]
     sugarLevels_updated += sugarInCell - metabolisms
     survivors = np.where(sugarLevels_updated > 0)[0]
     return positions[survivors,:], visions[survivors], metabolisms[survivors], sugarLevels_updated[survivors]
@@ -30,9 +30,7 @@ def updateSugarLevels(positions, sugarlevels, metabolisms, visions, sugarArena):
 def updatePositions(A, L, positions, visions, sugarArena):
     positions_updated = np.copy(positions)
 
-    globalSugarList_x = np.where(sugarArena != 0)[0].reshape((-1,1))
-    globalSugarList_y = np.where(sugarArena != 0)[1].reshape((-1,1))
-    globalSugarList = np.concatenate((globalSugarList_x, globalSugarList_y), 1)
+    globalSugarList = np.array(np.where(sugarArena != 0)).T
     for a in rnd.sample(range(A), A-1):
         distance = np.linalg.norm(positions[a,:] - globalSugarList[:,:], axis=1)
         iSugarList = np.where(distance <= visions[a])[0]
