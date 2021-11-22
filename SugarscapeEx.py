@@ -158,6 +158,7 @@ s_min = 5
 s_max = 25
 growthRate = 1
 sproutRate = 25
+reproductionProbability = 0.1
 
 sugarArena_0 = initializeSugarArena(L, plantProb, globalSugarMax)
 sugar_max = np.ones([L,L])*globalSugarMax
@@ -172,6 +173,7 @@ sugarlevels_t = deepcopy(sugarlevels_0)
 for t in range(500):
     positions_t = updatePositions(A, L, positions_t, visions, sugarArena_t)
     positions_t, visions, metabolisms, sugarlevels_t = updateSugarLevels(positions_t, sugarlevels_t, metabolisms, visions, sugarArena_t)
+    positions_t, visions, metabolisms, sugarlevels_t = reproduce(L, v_min, v_max, m_min, m_max, s_min, s_max, positions_t, visions, metabolisms, sugarlevels_t, reproductionProbability)
     A = len(sugarlevels_t)
     A_list.append(A)
 
