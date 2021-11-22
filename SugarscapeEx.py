@@ -44,9 +44,7 @@ def updateSugarLevels(positions, sugarlevels, metabolisms, visions, sugarArena):
 def updatePositions(A, L, positions, visions, sugarArena):
     positions_updated = np.copy(positions)
 
-    globalSugarList_x = np.where(sugarArena != 0)[0].reshape((-1,1))
-    globalSugarList_y = np.where(sugarArena != 0)[1].reshape((-1,1))
-    globalSugarList = np.concatenate((globalSugarList_x, globalSugarList_y), 1)
+    globalSugarList = np.array(np.where(sugarArena != 0)).T
     for a in range(A):
         distance = np.linalg.norm(positions[a,:] - globalSugarList[:,:], axis=1)
         iSugarList = np.where(distance <= visions[a])[0]
