@@ -78,7 +78,7 @@ def initializePrey(A, N, v_min, v_max, m_min, m_max, s_min, s_max):
 
 def getImage(positions, sugarArena, A, globalSugarMax):
     width = np.shape(sugarArena)[0]
-    image = np.zeros((50, 50, 3))
+    image = np.zeros((width, width, 3))
     image[:,:,1] = 175 # Green grass
     image[sugarArena > 0, :] = 0
     image[:,:,0] = (sugarArena * 1.5*255/globalSugarMax).astype(int) # Red food
