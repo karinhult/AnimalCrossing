@@ -1,0 +1,13 @@
+22/11
+We have a functioning basic sugarscape model with one type of agent (prey) and sugar regrowth according to a spatial Poisson process.
+We have also witten classes for prey and population, but for now they are unused.
+
+The current plan is to simulate a road by setting the sugar content of a number of adjecent columns to -1. This makes it easy to spot the
+road in the rest of the code, and also makes sure that agents will not want to cross it.
+
+Might change roads to -2 sugar content and add tunnels with -1 sugar content, to differentiate between them. Bridges could in principle
+have food growing on them, so setting their sugar content to zero and barring any tiles with negative sugar content from growing
+new sugar should give the desired behavior. 
+Simplification: if an agent can see sugar on the other side of the road, and ALSO a path to cross the road (tunnel/bridge), 
+it will automatically reach the sugar.
+
