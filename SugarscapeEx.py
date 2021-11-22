@@ -36,7 +36,7 @@ def updateSugarArenaPois(N, positions, sugarArena, g, growthRate, sugar_max):
 
 def updateSugarLevels(positions, sugarlevels, metabolisms, visions, sugarArena):
     sugarLevels_updated = np.copy(sugarlevels)
-    sugarInCell = np.reshape(sugarArena[(positions[:,0], positions[:,1])], (-1, 1))
+    sugarInCell = (sugarArena[positions[:,0], positions[:,1]])[:,np.newaxis]
     sugarLevels_updated += sugarInCell - metabolisms
     survivors = np.where(sugarLevels_updated > 0)[0]
     return positions[survivors,:], visions[survivors], metabolisms[survivors], sugarLevels_updated[survivors]
