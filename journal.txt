@@ -11,3 +11,5 @@ new sugar should give the desired behavior.
 Simplification: if an agent can see sugar on the other side of the road, and ALSO a path to cross the road (tunnel/bridge), 
 it will automatically reach the sugar.
 
+Reproduction will be added simply as a probability that any living agent can spawn a new agent in each round.
+
