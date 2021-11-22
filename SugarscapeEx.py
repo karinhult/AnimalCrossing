@@ -7,29 +7,15 @@ from copy import deepcopy
 import time
 import random as rnd
 
-def updateSugarArena(N, positions, sugarArena, g, sugar_max):
+def updateSugarArena(N, positions, sugarArena, growthRate, sproutRate, sugar_max):
     sugarArena_updated = deepcopy(sugarArena)
-    for i in range(N):
-        for j in range(N):
-            if [i, j] in positions.tolist():
-                sugarArena_updated[i, j] = 0.0
-            elif sugarArena_updated[i,j] < sugar_max[i, j]:
-                sugarArena_updated[i, j] += g
-    return sugarArena_updated
-
-def updateSugarArenaPois(N, positions, sugarArena, g, growthRate, sugar_max):
-    sugarArena_updated = deepcopy(sugarArena)
-    nNewSugarPoints = np.random.poisson(growthRate)
+    nNewSugarPoints = np.random.poisson(sproutRate)
     newSugarPositions = np.random.randint(0, N, size=[nNewSugarPoints, 2])
 
-    sugarArena_updated[newSugarPositions[:,0], newSugarPositions[:,1]] += g
+    sugarArena_updated[newSugarPositions[:,0], newSugarPositions[:,1]] += growthRate
 
-    #globalSugarList_x = np.where(sugarArena != 0)[0].reshape((-1, 1))
-    #globalSugarList_y = np.where(sugarArena != 0)[1].reshape((-1, 1))
-    #globalSugarList = np.concatenate((globalSugarList_x, globalSugarList_y), 1)
+    sugarArena_updated = np.minimum(sugarArena_updated, sugar_max)
 
-    #sugarAndAgent = np.intersect2d(positions, globalSugarList)
-    #sugarArena_updated[sugarAndAgent] = 0
     sugarArena_updated[positions[:,0], positions[:,1]] = 0
 
     return sugarArena_updated
@@ -47,12 +33,14 @@ def updatePositions(A, L, positions, visions, sugarArena):
     globalSugarList_x = np.where(sugarArena != 0)[0].reshape((-1,1))
     globalSugarList_y = np.where(sugarArena != 0)[1].reshape((-1,1))
     globalSugarList = np.concatenate((globalSugarList_x, globalSugarList_y), 1)
-    for a in range(A):
+    for a in rnd.sample(range(A), A-1):
         distance = np.linalg.norm(positions[a,:] - globalSugarList[:,:], axis=1)
         iSugarList = np.where(distance <= visions[a])[0]
         nSugarPossibilities = iSugarList.shape[0]
         if nSugarPossibilities > 0:
-            positions_updated[a,:] = globalSugarList[rnd.choice(iSugarList),:]
+            positionChoice = rnd.choice(iSugarList)
+            positions_updated[a,:] = globalSugarList[positionChoice,:]
+            globalSugarList = np.delete(globalSugarList, positionChoice, axis=0)
         else:
             notValidPosition = True
             while notValidPosition:
@@ -146,8 +134,8 @@ m_min = 1
 m_max = 4
 s_min = 5
 s_max = 25
-g = 1
-growthRate = 25
+growthRate = 1
+sproutRate = 25
 
 sugarArena_0 = initializeSugarArena(L, plantProb, globalSugarMax)
 sugar_max = np.ones([L,L])*globalSugarMax
@@ -168,11 +156,11 @@ for t in range(500):
     image = getImage(positions_t, sugarArena_t, A, globalSugarMax)
     img = itk.PhotoImage(Image.fromarray(np.uint8(image),'RGB').resize((res, res), resample=Image.BOX))
     canvas.create_image(0, 0, anchor=NW, image=img)
-    tk.title('time' + str(t))
+    tk.title('time=' + str(t) + ', alive agents=' + str(int(A)))
     time.sleep(imageDelay)
     tk.update()
 
-    sugarArena_t = updateSugarArenaPois(L, positions_t, sugarArena_t, g, growthRate, sugar_max)
+    sugarArena_t = updateSugarArena(L, positions_t, sugarArena_t, growthRate, sproutRate, sugar_max)
 
 Tk.mainloop(canvas)
 
