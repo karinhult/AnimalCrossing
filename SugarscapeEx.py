@@ -17,7 +17,7 @@ def updateSugarArena(N, positions, sugarArena, growthRate, sproutRate, sugar_max
     sugarArena_updated = np.minimum(sugarArena_updated, sugar_max)
 
     sugarArena_updated[positions[:,0], positions[:,1]] = 0
-
+    sugarArena_updated = addRoad(L/2, 4, sugarArena_updated, -1)
     return sugarArena_updated
 
 def updateSugarLevels(positions, sugarlevels, metabolisms, visions, sugarArena):
@@ -56,6 +56,7 @@ def updatePositions(A, L, positions, visions, sugarArena):
 def initializeSugarArena(L, plantProb, globalSugarMax):
     # For later: Add different sugar maximums in different parts of the arena?
     sugarArena = np.random.randint(1,globalSugarMax, size=(L,L)) * (np.random.rand(L,L) < plantProb)
+    sugarArena = addRoad(L/2, 4, sugarArena, -1)
     return sugarArena
 
 #Adds road
