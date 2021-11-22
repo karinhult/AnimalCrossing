@@ -30,7 +30,7 @@ def updateSugarLevels(positions, sugarlevels, metabolisms, visions, sugarArena):
 def updatePositions(A, L, positions, visions, sugarArena):
     positions_updated = np.copy(positions)
 
-    globalSugarList = np.array(np.where(sugarArena > 0)).T
+    globalSugarList = np.array(np.where(sugarArena != 0)).T
     for a in rnd.sample(range(A), A-1):
         distance = np.linalg.norm(positions[a,:] - globalSugarList[:,:], axis=1)
         iSugarList = np.where(distance <= visions[a])[0]
@@ -67,7 +67,7 @@ def addRoad(pos, width, sugarArena, undesirability = -1):
     return sugarArena
 
 def initializePrey(A, N, v_min, v_max, m_min, m_max, s_min, s_max):
-    positions = np.random.randint(0, N, (A, 2))
+    positions = np.random.randint(0, [N, int(N/2-4)], (A, 2))
     visions = np.random.randint(v_min, v_max+1, (A, 1))
     metabolisms = np.random.randint(m_min, m_max+1, (A, 1)).astype(float)
     sugarlevels = np.random.randint(s_min, s_max+1, (A, 1)).astype(float)
@@ -123,7 +123,7 @@ speedDn.place(relx=0.2, rely=.85, relheight=0.12, relwidth=0.15)
 
 plantProb = 0.5
 L = 50
-A = 400
+A = 100
 A_list = np.zeros(501)
 A_list[0] = A
 globalSugarMax = 4
