@@ -6,6 +6,7 @@ from PIL import ImageTk as itk
 from copy import deepcopy
 import time
 import random as rnd
+import itertools
 
 def updateSugarArena(N, positions, sugarArena, growthRate, sproutRate, sugar_max):
     sugarArena_updated = deepcopy(sugarArena)
@@ -76,6 +77,29 @@ def initializePrey(A, N, v_min, v_max, m_min, m_max, s_min, s_max):
     #can return prey and positions? if we want that
     return positions, visions, metabolisms, sugarlevels
 
+# Animals can give birth on the road
+def reproduce(L, v_min, v_max, m_min, m_max, s_min, s_max, positions, visions, metabolisms, sugarlevels, reproductionProbability):
+    reproductions = (np.random.rand(len(visions)) < reproductionProbability)
+    reproductionAmount = np.sum(reproductions)
+    reproductionPositions = positions[reproductions]
+    translations = np.array(list(itertools.product(range(-1,2), repeat=2)))
+    if reproductionAmount > 0:
+        adjacencies = list(np.apply_along_axis(np.add, 1, reproductionPositions, translations))
+        for individualAdjacencies in adjacencies:
+            inRange = np.all(individualAdjacencies < L, axis=1)
+            individualAdjacencies = individualAdjacencies[inRange]
+            posList = [position for position in positions]
+            individualAdjacencies = [reprPos for reprPos in individualAdjacencies.tolist() if reprPos not in positions.tolist()]
+            chosenSpot = np.array(individualAdjacencies[np.random.randint(len(individualAdjacencies))])
+            positions = np.append(positions, chosenSpot[np.newaxis,:], axis=0)
+            if chosenSpot.size == 0:
+                reproductionAmount -= 1
+        visions = np.append(visions, np.random.randint(v_min, v_max+1, (reproductionAmount, 1)), axis=0)
+        metabolisms = np.append(metabolisms, np.random.randint(m_min, m_max+1, (reproductionAmount, 1)), axis=0)
+        sugarlevels = np.append(sugarlevels, np.random.randint(s_min, s_max+1, (reproductionAmount, 1)), axis=0)
+
+    return positions, visions, metabolisms, sugarlevels
+
 def getImage(positions, sugarArena, A, globalSugarMax):
     width = np.shape(sugarArena)[0]
     image = np.zeros((width, width, 3))
@@ -124,8 +148,7 @@ speedDn.place(relx=0.2, rely=.85, relheight=0.12, relwidth=0.15)
 plantProb = 0.5
 L = 50
 A = 100
-A_list = np.zeros(501)
-A_list[0] = A
+A_list = [A]
 globalSugarMax = 4
 v_min = 1
 v_max = 6
@@ -150,7 +173,7 @@ for t in range(500):
     positions_t = updatePositions(A, L, positions_t, visions, sugarArena_t)
     positions_t, visions, metabolisms, sugarlevels_t = updateSugarLevels(positions_t, sugarlevels_t, metabolisms, visions, sugarArena_t)
     A = len(sugarlevels_t)
-    A_list[t+1] = A
+    A_list.append(A)
 
     image = getImage(positions_t, sugarArena_t, A, globalSugarMax)
     img = itk.PhotoImage(Image.fromarray(np.uint8(image),'RGB').resize((res, res), resample=Image.BOX))
