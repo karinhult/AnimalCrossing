@@ -13,3 +13,9 @@ it will automatically reach the sugar.
 
 Reproduction will be added simply as a probability that any living agent can spawn a new agent in each round.
 
+Final note: Basic reproduction has been added, but tunnels/bridges are not finished yet.
+
+
+24/11
+There might be a bug in our position initialization, as the initial agents spawn on the road despite our attempts to confine them
+to only one side of the board.
