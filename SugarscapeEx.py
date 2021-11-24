@@ -180,7 +180,7 @@ tk.title('time=' + str(t) + ', alive agents=' + str(int(A)))
 time.sleep(imageDelay)
 tk.update()
 
-for t in range(500):
+for t in range(1,500):
     positions_t = updatePositions(A, L, positions_t, visions, sugarArena_t)
     positions_t, visions, metabolisms, sugarlevels_t = updateSugarLevels(positions_t, sugarlevels_t, metabolisms, visions, sugarArena_t)
     positions_t, visions, metabolisms, sugarlevels_t = reproduce(L, v_min, v_max, m_min, m_max, s_min, s_max, positions_t, visions, metabolisms, sugarlevels_t, reproductionProbability)
