@@ -210,4 +210,5 @@ class Population:
             else:
                 agent.position = self.moveNotSugar(agent, sugarArena, iRoadMin, iRoadMax, crossingMin, crossingMax).astype(int)
 
+
         self.updateSugarLevels(sugarArena)
