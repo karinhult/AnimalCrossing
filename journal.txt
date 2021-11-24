@@ -18,4 +18,7 @@ Final note: Basic reproduction has been added, but tunnels/bridges are not finis
 
 24/11
 There might be a bug in our position initialization, as the initial agents spawn on the road despite our attempts to confine them
-to only one side of the board.
+to only one side of the board. This issue was caused by the initial state of the board never being plotted and  the time step
+variable t was lagging behind by 1, so that the first updated state was labeled with t=0 instead of t=1. This has been fixed.
+
+Currently working on implementing classes for the agents and adding tunnels/bridges.
