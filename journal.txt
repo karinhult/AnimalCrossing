@@ -24,5 +24,6 @@ variable t was lagging behind by 1, so that the first updated state was labeled 
 Currently working on implementing classes for the agents and adding crossings.
 
 The road is now a proper barrier. There was a bug earlier due to an inconsistency in coordinate specification, where we sometimes used
-(y, x) and sometimes (x, y). This made the road appear vertical when it was actually horizontal in the simulation.
+(y, x) and sometimes (x, y). This made the road appear vertical when it was actually horizontal in the simulation. 
+From now on, coordinates must always be specified as (y, x) due to the indexing of matrices.
 Crossings have been implemented but not tested yet.
