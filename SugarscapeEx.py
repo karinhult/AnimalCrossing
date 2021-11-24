@@ -29,91 +29,6 @@ def updateSugarLevels(positions, sugarlevels, metabolisms, visions, sugarArena):
     survivors = np.where(sugarLevels_updated > 0)[0]
     return positions[survivors,:], visions[survivors], metabolisms[survivors], sugarLevels_updated[survivors]
 
-def moveNotSugar(positions, visions, a, L, sugarArena, iRoadMin, iRoadMax, crossingMin, crossingMax):
-    notValidPosition = True
-    while notValidPosition:
-        v = np.random.uniform(0, visions[a])
-        theta = np.random.uniform(0, 2 * np.pi)
-        velocity = np.array([np.rint(v * np.sin(theta)), np.rint(v * np.cos(theta))]).flatten()
-        newPosition = positions[a, :] + velocity
-        insideArena = newPosition[0] >= 0 and newPosition[0] < L and newPosition[1] >= 0 and newPosition[1] < L
-        validVelocity = np.linalg.norm(velocity, axis=0) <= visions[a]
-        if insideArena and validVelocity:
-            notOnRoad = sugarArena[int(newPosition[0]), int(newPosition[1])] != -2
-            if len(crossingMin) != 0 and len(crossingMax) != 0 and notOnRoad:
-                distanceCrossingMin = np.linalg.norm(positions[a, :] - crossingMin[:, :], axis=1)
-                distanceCrossingMax = np.linalg.norm(positions[a, :] - crossingMax[:, :], axis=1)
-                if ((distanceCrossingMin <= visions[a]).any() or (distanceCrossingMax <= visions[a]).any()):
-                    return newPosition
-            if notOnRoad and (np.sign(newPosition[1] - iRoadMin) == np.sign(positions[a,1] - iRoadMin)
-                              or np.sign(newPosition[1] - iRoadMax) == np.sign(positions[a,1] - iRoadMax)):
-                return newPosition
-
-def chooseRoad(positions, visions, a, localSugarList, crossingMin, crossingMax, iRoadMin, iRoadMax, probCross):
-    positionChoice = -1
-    if len(crossingMin) != 0 and len(crossingMax) != 0:
-        distanceCrossingMin = np.linalg.norm(positions[a, :] - crossingMin[:, :], axis=1)
-        distanceCrossingMax = np.linalg.norm(positions[a, :] - crossingMax[:, :], axis=1)
-        if (distanceCrossingMin <= visions[a]).any() or (distanceCrossingMax <= visions[a]).any():
-            iSameSideMin = np.where(np.sign(localSugarList[:, 1] - iRoadMin) == np.sign(positions[a, 1] - iRoadMin))[0]
-            iSameSideMax = np.where(np.sign(localSugarList[:, 1] - iRoadMax) == np.sign(positions[a, 1] - iRoadMax))[0]
-            iSameSide = np.intersect1d(iSameSideMin, iSameSideMax)
-            pSameSide = (1-probCross)*np.full_like(iSameSide, 1)
-            iBridge = np.setxor1d(iSameSideMin, iSameSideMax)
-            pBridge = probCross*np.full_like(iBridge, 1)
-            iDiffSideMin = np.where(np.sign(localSugarList[:, 1] - iRoadMin) != np.sign(positions[a, 1] - iRoadMin))[0]
-            iDiffSideMax = np.where(np.sign(localSugarList[:, 1] - iRoadMax) != np.sign(positions[a, 1] - iRoadMax))[0]
-            iDiffSide = np.intersect1d(iDiffSideMin, iDiffSideMax)
-            pDiffSide = probCross**np.full_like(iDiffSide, 1)
-
-            iLocalSugarList = np.array([])
-            possibilities = np.array([])
-            iLocalSugarList = np.append(iLocalSugarList, (iSameSide, iBridge, iDiffSide))
-            possibilities = np.append(possibilities, (pSameSide, pBridge, pDiffSide)) / np.sum(possibilities)
-
-            positionChoice = np.random.choice(iLocalSugarList, 1, p=possibilities)[0]
-        else:
-            iLocalSugarList = np.where(np.sign(localSugarList[:, 1] - iRoadMin) == np.sign(positions[a, 1] - iRoadMin))[0]
-            nSugarPossibilities = iLocalSugarList.shape[0]
-            if nSugarPossibilities > 0:
-                positionChoice = rnd.choice(iLocalSugarList)
-    else:
-        iLocalSugarList = np.where(np.sign(localSugarList[:, 1] - iRoadMin) == np.sign(positions[a, 1] - iRoadMin))[0]
-        nSugarPossibilities = len(iLocalSugarList)
-        if nSugarPossibilities > 0:
-            positionChoice = rnd.choice(iLocalSugarList)
-
-    return positionChoice
-
-def updatePositions(A, L, positions, visions, sugarArena, isRoad = False, crossingMin = np.array([]), crossingMax = np.array([]),
-                    iRoadMin = 0, iRoadMax = 0, probCross = 0.1):
-    positions_updated = np.copy(positions)
-    globalSugarList = np.array(np.where(sugarArena > 0)).T
-    for a in rnd.sample(range(A), A):
-        distance = np.linalg.norm(positions[a,:] - globalSugarList[:,:], axis=1)
-        iGlobalSugarList = np.where(distance <= visions[a])[0]
-        nSugarPossibilities = len(iGlobalSugarList)
-        if nSugarPossibilities > 0:
-            if isRoad:
-                localSugarList = globalSugarList[iGlobalSugarList, :]
-                positionChoice = chooseRoad(positions, visions, a, localSugarList, crossingMin, crossingMax,
-                                            iRoadMin, iRoadMax, probCross)
-                if positionChoice == -1:
-                    positions_updated[a,:] = moveNotSugar(positions, visions, a, L, sugarArena, iRoadMin, iRoadMax, crossingMin, crossingMax)
-                else:
-                    positions_updated[a,:] = localSugarList[int(positionChoice), :]
-                    wheres = np.where((globalSugarList[:,:] == localSugarList[int(positionChoice),:]).all(axis=1))[0]
-                    globalSugarList = np.delete(globalSugarList, wheres, axis=0)
-
-            else:
-                positionChoice = rnd.choice(iGlobalSugarList)
-                positions_updated[a,:] = globalSugarList[positionChoice,:]
-                globalSugarList = np.delete(globalSugarList, positionChoice, axis=0)
-        else:
-            positions_updated[a,:] = moveNotSugar(positions, visions, a, L, sugarArena, iRoadMin, iRoadMax, crossingMin, crossingMax)
-
-    return positions_updated
-
 def initializeSugarArena(L, plantProb, globalSugarMax, roadWidth=4, roadValue=-2):
     # For later: Add different sugar maximums in different parts of the arena?
     sugarArena = np.random.randint(1,globalSugarMax, size=(L,L)) * (np.random.rand(L,L) < plantProb)
@@ -243,7 +158,8 @@ while True:
     tk.title(f'Time: {t}. Agents: {A}')
     time.sleep(imageDelay)
     tk.update()
-    population.updatePositions(sugarArena_t, undesirability)
+    # population.updatePositions(sugarArena_t, undesirability)
+    population.updatePositions(sugarArena_t)
 
     sugarArena_t = updateSugarArena(L, population.positions, sugarArena_t, growthRate, sproutRate, sugar_max, undesirability)
 
