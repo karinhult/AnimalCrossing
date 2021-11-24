@@ -33,9 +33,20 @@ class Prey:
     def position(self, value):
         self._position = value
 
+def getRoadWidth(sugarArena, undesirability): # Temporary
+    roadCorners = np.array([[dimension[0], dimension[-1]] for dimension in np.where(sugarArena == undesirability)]).T
+    roadWidth = np.diff(roadCorners, axis=0)[0][1]+1
+    if roadWidth >= np.shape(sugarArena)[0]:
+        raise Exception('Horizontal road')
+    return roadWidth
+
 class Population:
-    def __init__(self, preyAmount, visionRange, metabolismRange, sugarLevelRange, arenaLength):
-        positions =   np.random.randint(0, arenaLength, (preyAmount, 2))
+    def __init__(self, preyAmount, visionRange, metabolismRange, sugarLevelRange, sugarArena, undesirability):
+        roadWidth = getRoadWidth(sugarArena, undesirability)
+        arenaLength = np.shape(sugarArena)[0]
+        positions = np.random.randint((0,0), (arenaLength, arenaLength-roadWidth), (preyAmount, 2))
+        positions[:,1] = positions[:,1] + roadWidth*(positions[:,1] >= (arenaLength-roadWidth)/2)
+
         visions =     np.random.randint(visionRange[0], visionRange[1]+1, preyAmount)
         metabolisms = np.random.randint(metabolismRange[0], metabolismRange[1]+1, preyAmount)
         sugarLevels = np.random.randint(sugarLevelRange[0], sugarLevelRange[1], preyAmount)
@@ -77,3 +88,40 @@ class Population:
     def positions(self, values):
         for animal, position in zip(self._prey, values):
             animal.position = position
+
+    def updatePositions(self, sugarArena, undesirability):
+        L = np.shape(sugarArena)[0]
+
+        globalSugarList = np.array(np.nonzero(sugarArena)).T
+        roadWidth = getRoadWidth(sugarArena, undesirability)
+
+        for agent in np.random.permutation(self.prey):
+            agentOnLeftSide = agent.position[1] < ((L-roadWidth)/2)
+            distance = np.linalg.norm(agent.position - globalSugarList[:,:], axis=1)
+            iSugarList = np.where(distance <= agent.vision)[0]
+            nSugarPossibilities = iSugarList.shape[0]
+            if nSugarPossibilities > 0:
+                positionChoice = np.random.choice(iSugarList)
+                agent.position = globalSugarList[positionChoice,:]
+                # positionsUpdated[agent,:] = globalSugarList[positionChoice,:]
+                globalSugarList = np.delete(globalSugarList, positionChoice, axis=0)
+            else:
+                notValidPosition = True
+                while notValidPosition:
+                    v = np.random.uniform(0, agent.vision)
+                    theta = np.random.uniform(0, 2*np.pi)
+                    vision = np.array([np.rint(v*np.cos(theta)), np.rint(v*np.sin(theta))]).flatten()
+                    newPosition = agent.position + vision
+                    insideArena = newPosition[0] >= 0 and newPosition[0] < L and newPosition[1] >= 0 and newPosition[1] < L
+                    rightRoadSide = (agentOnLeftSide and (newPosition[1] < ((L-roadWidth)/2)) or (not agentOnLeftSide) and (newPosition[1] > ((L+roadWidth)/2)))
+                    validVision = np.linalg.norm(vision, axis=0) <= agent.vision
+                    if insideArena and validVision and rightRoadSide:
+                        agent.position = newPosition.astype(int)
+                        notValidPosition = False
+
+        self.updateSugarLevels(sugarArena)
+
+    def updateSugarLevels(self, sugarArena):
+        pos = self.positions
+        sugarInCells = sugarArena[pos[:,0], pos[:,1]]
+        self.sugarLevels = self.sugarLevels + sugarInCells - self.metabolisms
