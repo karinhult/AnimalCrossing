@@ -21,4 +21,8 @@ There might be a bug in our position initialization, as the initial agents spawn
 to only one side of the board. This issue was caused by the initial state of the board never being plotted and  the time step
 variable t was lagging behind by 1, so that the first updated state was labeled with t=0 instead of t=1. This has been fixed.
 
-Currently working on implementing classes for the agents and adding tunnels/bridges.
+Currently working on implementing classes for the agents and adding crossings.
+
+The road is now a proper barrier. There was a bug earlier due to an inconsistency in coordinate specification, where we sometimes used
+(y, x) and sometimes (x, y). This made the road appear vertical when it was actually horizontal in the simulation.
+Crossings have been implemented but not tested yet.
