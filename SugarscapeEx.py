@@ -132,7 +132,18 @@ def addRoad(pos, width, sugarArena, undesirability = -1):
     return sugarArena
 
 def initializePrey(A, N, v_min, v_max, m_min, m_max, s_min, s_max, roadWidth=4, oneSide=True):
-    positions = np.random.randint(0, [N, int(N/2-roadWidth)], (A, 2))
+    if oneSide:
+        positions = np.random.randint(0, [N, int(N/2-roadWidth)], (A, 2))
+    else:
+        positions1 = np.random.randint(0, [N, int(N/2-roadWidth)], (int(A/2), 2))
+        positions2 = np.random.randint([0, int(N/2+roadWidth)], N, (int(A/2), 2))
+        positions = np.random.randint(0, 1, (A, 2))
+        for i in range(A):
+            if i < A/2:
+                positions[i] = positions1[i]
+            else:
+                positions[i] = positions2[i-int(A/2)]
+        #positions = np.random.randint([0, int(N/2+roadWidth)], N, (A, 2))
     visions = np.random.randint(v_min, v_max+1, (A, 1))
     metabolisms = np.random.randint(m_min, m_max+1, (A, 1)).astype(float)
     sugarlevels = np.random.randint(s_min, s_max+1, (A, 1)).astype(float)
@@ -230,7 +241,7 @@ roadValue = -2
 sugarArena_0 = initializeSugarArena(L, plantProb, globalSugarMax, roadWidth, roadValue)
 sugar_max = np.ones([L,L])*globalSugarMax
 sugarArena_t = deepcopy(sugarArena_0)
-positions_0, visions, metabolisms, sugarlevels_0 = initializePrey(A, L, v_min, v_max, m_min, m_max, s_min, s_max)
+positions_0, visions, metabolisms, sugarlevels_0 = initializePrey(A, L, v_min, v_max, m_min, m_max, s_min, s_max, oneSide=False)
 
 positions_t = deepcopy(positions_0)
 sugarlevels_t = deepcopy(sugarlevels_0)
