@@ -227,7 +227,7 @@ undesirability = -2
 sugarArena_0 = initializeSugarArena(L, plantProb, globalSugarMax, hasRoad = True, roadWidth = roadWidth, roadValue = roadValue)
 sugar_max = np.ones([L,L])*globalSugarMax
 sugarArena_t = deepcopy(sugarArena_0)
-positions_0, visions, metabolisms, sugarlevels_0 = initializePrey(A, L, v_min, v_max, m_min, m_max, s_min, s_max, hasRoad = True)
+#positions_0, visions, metabolisms, sugarlevels_0 = initializePrey(A, L, v_min, v_max, m_min, m_max, s_min, s_max, hasRoad = True)
 
 population = Population(A, visionRange, metabolismRange, sugarLevelRange, sugarArena_t, undesirability)
 # positions_t = deepcopy(positions_0)
