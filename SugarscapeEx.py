@@ -64,11 +64,11 @@ def initializeSugarArena(L, plantProb, globalSugarMax, roadWidth=4, roadValue=-1
 def addRoad(pos, width, sugarArena, undesirability = -1):
     j1 = int(pos-width/2)
     j2 = int(pos+width/2)
-    sugarArena[:,j1:j2] = undesirability
+    sugarArena[j1:j2, :] = undesirability
     return sugarArena
 
-def initializePrey(A, N, v_min, v_max, m_min, m_max, s_min, s_max, roadWidth=4):
-    positions = np.random.randint(0, [N, int(N/2-roadWidth)], (A, 2))
+def initializePrey(A, N, v_min, v_max, m_min, m_max, s_min, s_max, roadWidth=4, oneSide=True):
+    positions = np.random.randint(0, [int(N/2-roadWidth), N], (A, 2))
     visions = np.random.randint(v_min, v_max+1, (A, 1))
     metabolisms = np.random.randint(m_min, m_max+1, (A, 1)).astype(float)
     sugarlevels = np.random.randint(s_min, s_max+1, (A, 1)).astype(float)
