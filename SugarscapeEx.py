@@ -68,13 +68,8 @@ def chooseRoad(positions, visions, a, localSugarList, crossingMin, crossingMax, 
 
             iLocalSugarList = np.array([])
             possibilities = np.array([])
-            iLocalSugarList = np.append(iLocalSugarList, iSameSide)
-            possibilities = np.append(possibilities, pSameSide)
-            iLocalSugarList = np.append(iLocalSugarList, iBridge)
-            possibilities = np.append(possibilities, pBridge)
-            iLocalSugarList = np.append(iLocalSugarList, iDiffSide)
-            possibilities = np.append(possibilities, pDiffSide)
-            possibilities = possibilities/np.sum(possibilities)
+            iLocalSugarList = np.append(iLocalSugarList, (iSameSide, iBridge, iDiffSide))
+            possibilities = np.append(possibilities, (pSameSide, pBridge, pDiffSide)) / np.sum(possibilities)
 
             positionChoice = np.random.choice(iLocalSugarList, 1, p=possibilities)[0]
         else:
