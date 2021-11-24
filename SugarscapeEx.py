@@ -10,7 +10,7 @@ import itertools
 from Population import *
 
 def updateSugarArena(N, positions, sugarArena, growthRate, sproutRate, sugar_max, roadValue, roadWidth=4):
-    sugarArena_updated = deepcopy(sugarArena)
+    sugarArena_updated = np.copy(sugarArena)
     nNewSugarPoints = np.random.poisson(sproutRate)
     newSugarPositions = np.random.randint(0, N, size=[nNewSugarPoints, 2])
 
@@ -138,12 +138,12 @@ hasRoad = True
 
 sugarArena_0 = initializeSugarArena(L, plantProb, globalSugarMax, roadWidth, roadValue)
 sugar_max = np.ones([L,L])*globalSugarMax
-sugarArena_t = deepcopy(sugarArena_0)
+sugarArena_t = np.copy(sugarArena_0)
 # positions_0, visions, metabolisms, sugarlevels_0 = initializePrey(A, L, v_min, v_max, m_min, m_max, s_min, s_max)
 
 population = Population(A, visionRange, metabolismRange, sugarLevelRange, sugarArena_t, undesirability)
-# positions_t = deepcopy(positions_0)
-# sugarlevels_t = deepcopy(sugarlevels_0)
+# positions_t = np.copy(positions_0)
+# sugarlevels_t = np.copy(sugarlevels_0)
 
 #plt.pcolor(np.flip(sugarArena_0, 0))
 #plt.show()
