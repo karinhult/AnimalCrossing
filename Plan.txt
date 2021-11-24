@@ -6,6 +6,7 @@ Future plan:
 - Get reproduction
 - Implement so that a simple parameter determines if there is a road
 - Implement so that a simple parameter determines if there are crossings
+- Implement so that a simple parameter determines if the animals are on one or both sides of the road
 - Make sure crossings work - meaning that the animals can cross the road if there is a crossing, and they can stand on the crossing but not on the road
 - Start simulating
   - Simulate x times without road and take average of number of dead animals
