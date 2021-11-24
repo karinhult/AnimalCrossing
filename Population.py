@@ -1,4 +1,5 @@
 import numpy as np
+import itertools
 
 class Prey:
     def __init__(self, vision, metabolism, sugarLevel, position):
@@ -88,38 +89,6 @@ class Population:
     def positions(self, values):
         for animal, position in zip(self._prey, values):
             animal.position = position
-
-    # def updatePositions(self, sugarArena, undesirability):
-    #     L = np.shape(sugarArena)[0]
-
-    #     globalSugarList = np.array(np.nonzero(sugarArena)).T
-    #     roadWidth = getRoadWidth(sugarArena, undesirability)
-
-    #     for agent in np.random.permutation(self.prey):
-    #         agentOnLeftSide = agent.position[1] < ((L-roadWidth)/2)
-    #         distance = np.linalg.norm(agent.position - globalSugarList[:,:], axis=1)
-    #         iSugarList = np.where(distance <= agent.vision)[0]
-    #         nSugarPossibilities = iSugarList.shape[0]
-    #         if nSugarPossibilities > 0:
-    #             positionChoice = np.random.choice(iSugarList)
-    #             agent.position = globalSugarList[positionChoice,:]
-    #             # positionsUpdated[agent,:] = globalSugarList[positionChoice,:]
-    #             globalSugarList = np.delete(globalSugarList, positionChoice, axis=0)
-    #         else:
-    #             notValidPosition = True
-    #             while notValidPosition:
-    #                 v = np.random.uniform(0, agent.vision)
-    #                 theta = np.random.uniform(0, 2*np.pi)
-    #                 vision = np.array([np.rint(v*np.cos(theta)), np.rint(v*np.sin(theta))]).flatten()
-    #                 newPosition = agent.position + vision
-    #                 insideArena = newPosition[0] >= 0 and newPosition[0] < L and newPosition[1] >= 0 and newPosition[1] < L
-    #                 rightRoadSide = (agentOnLeftSide and (newPosition[1] < ((L-roadWidth)/2)) or (not agentOnLeftSide) and (newPosition[1] > ((L+roadWidth)/2)))
-    #                 validVision = np.linalg.norm(vision, axis=0) <= agent.vision
-    #                 if insideArena and validVision and rightRoadSide:
-    #                     agent.position = newPosition.astype(int)
-    #                     notValidPosition = False
-
-    #     self.updateSugarLevels(sugarArena)
 
     def updateSugarLevels(self, sugarArena):
         pos = self.positions
@@ -212,3 +181,29 @@ class Population:
 
 
         self.updateSugarLevels(sugarArena)
+
+    # Animals can give birth on the road
+    def reproduce(self, L, vRange, mRange, sRange, reproductionProbability):
+        reproductions = (np.random.rand(len(self.visions)) < reproductionProbability)
+        reproductionAmount = np.sum(reproductions)
+        reproductionPositions = self.positions[reproductions]
+        translations = np.array(list(itertools.product(range(-1,2), repeat=2)))
+        if reproductionAmount > 0:
+            adjacencies = list(np.apply_along_axis(np.add, 1, reproductionPositions, translations))
+            positions = np.empty((0,2), int)
+            for individualAdjacencies in adjacencies:
+                inRange = np.all((individualAdjacencies < L) & (individualAdjacencies >= 0), axis=1)
+                individualAdjacencies = individualAdjacencies[inRange]
+                posList = [position for position in self.positions]
+                individualAdjacencies = [reprPos for reprPos in individualAdjacencies.tolist() if reprPos not in self.positions.tolist()]
+                chosenSpot = np.array(individualAdjacencies[np.random.randint(len(individualAdjacencies))])
+                positions = np.append(positions, chosenSpot[np.newaxis,:], axis=0)
+                if chosenSpot.size == 0:
+                    reproductionAmount -= 1
+            visions = np.random.randint(vRange[0], vRange[1]+1, reproductionAmount)
+            metabolisms = np.random.randint(mRange[0], mRange[1]+1, reproductionAmount)
+            sugarLevels = np.random.randint(sRange[0], sRange[1]+1, reproductionAmount)
+
+        babies = np.array([Prey(visions[i].item(), metabolisms[i], sugarLevels[i], positions[i,:]) for i in range(reproductionAmount)])
+
+        self.prey = np.append(self.prey, babies)

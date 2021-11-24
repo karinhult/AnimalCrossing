@@ -52,29 +52,6 @@ def initializePrey(A, N, v_min, v_max, m_min, m_max, s_min, s_max, roadWidth=4, 
     #can return prey and positions? if we want that
     return positions, visions, metabolisms, sugarlevels
 
-# Animals can give birth on the road
-def reproduce(L, v_min, v_max, m_min, m_max, s_min, s_max, positions, visions, metabolisms, sugarlevels, reproductionProbability):
-    reproductions = (np.random.rand(len(visions)) < reproductionProbability)
-    reproductionAmount = np.sum(reproductions)
-    reproductionPositions = positions[reproductions]
-    translations = np.array(list(itertools.product(range(-1,2), repeat=2)))
-    if reproductionAmount > 0:
-        adjacencies = list(np.apply_along_axis(np.add, 1, reproductionPositions, translations))
-        for individualAdjacencies in adjacencies:
-            inRange = np.all((individualAdjacencies < L) & (individualAdjacencies >= 0), axis=1)
-            individualAdjacencies = individualAdjacencies[inRange]
-            posList = [position for position in positions]
-            individualAdjacencies = [reprPos for reprPos in individualAdjacencies.tolist() if reprPos not in positions.tolist()]
-            chosenSpot = np.array(individualAdjacencies[np.random.randint(len(individualAdjacencies))])
-            positions = np.append(positions, chosenSpot[np.newaxis,:], axis=0)
-            if chosenSpot.size == 0:
-                reproductionAmount -= 1
-        visions = np.append(visions, np.random.randint(v_min, v_max+1, (reproductionAmount, 1)), axis=0)
-        metabolisms = np.append(metabolisms, np.random.randint(m_min, m_max+1, (reproductionAmount, 1)), axis=0)
-        sugarlevels = np.append(sugarlevels, np.random.randint(s_min, s_max+1, (reproductionAmount, 1)), axis=0)
-
-    return positions, visions, metabolisms, sugarlevels
-
 def getImage(positions, sugarArena, A, globalSugarMax):
     width = np.shape(sugarArena)[0]
     image = np.zeros((width, width, 3))
@@ -161,6 +138,7 @@ while True:
     tk.update()
     # population.updatePositions(sugarArena_t, undesirability)
     population.updatePositions(sugarArena_t, hasRoad=hasRoad)
+    population.reproduce(L, visionRange, metabolismRange, sugarLevelRange, reproductionProbability)
 
     sugarArena_t = updateSugarArena(L, population.positions, sugarArena_t, growthRate, sproutRate, sugar_max, undesirability)
 
