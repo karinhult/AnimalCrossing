@@ -174,16 +174,16 @@ class Population:
                 iLocalSugarList = np.where(np.sign(localSugarList[:, 1] - iRoadMin) == np.sign(agent.position[1] - iRoadMin))[0]
                 nSugarPossibilities = iLocalSugarList.shape[0]
                 if nSugarPossibilities > 0:
-                    positionChoice = rnd.choice(iLocalSugarList)
+                    positionChoice = np.random.choice(iLocalSugarList)
         else:
             iLocalSugarList = np.where(np.sign(localSugarList[:, 1] - iRoadMin) == np.sign(agent.position[1] - iRoadMin))[0]
             nSugarPossibilities = len(iLocalSugarList)
             if nSugarPossibilities > 0:
-                positionChoice = rnd.choice(iLocalSugarList)
+                positionChoice = np.random.choice(iLocalSugarList)
 
         return positionChoice
 
-    def updatePositions(self, sugarArena, isRoad = False, crossingMin = np.array([]), crossingMax = np.array([]),
+    def updatePositions(self, sugarArena, hasRoad = False, crossingMin = np.array([]), crossingMax = np.array([]),
                         iRoadMin = 0, iRoadMax = 0, probCross = 0.1):
         L = np.shape(sugarArena)[0]
         globalSugarList = np.array(np.where(sugarArena > 0)).T
@@ -192,9 +192,9 @@ class Population:
             iGlobalSugarList = np.where(distance <= agent.vision)[0]
             nSugarPossibilities = len(iGlobalSugarList)
             if nSugarPossibilities > 0:
-                if isRoad:
+                if hasRoad:
                     localSugarList = globalSugarList[iGlobalSugarList, :]
-                    positionChoice = chooseRoad(agent, localSugarList, crossingMin, crossingMax,
+                    positionChoice = self.chooseRoad(agent, localSugarList, crossingMin, crossingMax,
                                                 iRoadMin, iRoadMax, probCross)
                     if positionChoice == -1:
                         agent.position = self.moveNotSugar(agent, sugarArena, iRoadMin, iRoadMax, crossingMin, crossingMax).astype(int)

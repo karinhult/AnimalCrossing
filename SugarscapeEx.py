@@ -29,7 +29,7 @@ def updateSugarLevels(positions, sugarlevels, metabolisms, visions, sugarArena):
     survivors = np.where(sugarLevels_updated > 0)[0]
     return positions[survivors,:], visions[survivors], metabolisms[survivors], sugarLevels_updated[survivors]
 
-def initializeSugarArena(L, plantProb, globalSugarMax, roadWidth=4, roadValue=-2):
+def initializeSugarArena(L, plantProb, globalSugarMax, hasRoad = False, roadWidth=4, roadValue=-2):
     # For later: Add different sugar maximums in different parts of the arena?
     sugarArena = np.random.randint(1,globalSugarMax, size=(L,L)) * (np.random.rand(L,L) < plantProb)
     sugarArena = addRoad(L/2, roadWidth, sugarArena, roadValue)
@@ -134,8 +134,9 @@ reproductionProbability = 0.1
 roadWidth = 4
 roadValue = -2
 undesirability = -2
+hasRoad = True
 
-sugarArena_0 = initializeSugarArena(L, plantProb, globalSugarMax, roadWidth, roadValue)
+sugarArena_0 = initializeSugarArena(L, plantProb, globalSugarMax, hasRoad = hasRoad, roadWidth, roadValue)
 sugar_max = np.ones([L,L])*globalSugarMax
 sugarArena_t = deepcopy(sugarArena_0)
 # positions_0, visions, metabolisms, sugarlevels_0 = initializePrey(A, L, v_min, v_max, m_min, m_max, s_min, s_max)
@@ -159,7 +160,7 @@ while True:
     time.sleep(imageDelay)
     tk.update()
     # population.updatePositions(sugarArena_t, undesirability)
-    population.updatePositions(sugarArena_t)
+    population.updatePositions(sugarArena_t, hasRoad=hasRoad)
 
     sugarArena_t = updateSugarArena(L, population.positions, sugarArena_t, growthRate, sproutRate, sugar_max, undesirability)
 
