@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 from tkinter import *
 from PIL import Image
 from PIL import ImageTk as itk
-from copy import deepcopy
 import time
 import random as rnd
 import itertools
