@@ -169,9 +169,18 @@ positions_0, visions, metabolisms, sugarlevels_0 = initializePrey(A, L, v_min, v
 positions_t = deepcopy(positions_0)
 sugarlevels_t = deepcopy(sugarlevels_0)
 
+t = 0
+image = getImage(positions_t, sugarArena_t, A, globalSugarMax)
+img = itk.PhotoImage(Image.fromarray(np.uint8(image),'RGB').resize((res, res), resample=Image.BOX))
+canvas.create_image(0, 0, anchor=NW, image=img)
+tk.title('time=' + str(t) + ', alive agents=' + str(int(A)))
+time.sleep(imageDelay)
+tk.update()
+#breakpoint()
+
 #plt.pcolor(np.flip(sugarArena_0, 0))
 #plt.show()
-for t in range(500):
+for t in range(1,500):
     positions_t = updatePositions(A, L, positions_t, visions, sugarArena_t)
     positions_t, visions, metabolisms, sugarlevels_t = updateSugarLevels(positions_t, sugarlevels_t, metabolisms, visions, sugarArena_t)
     positions_t, visions, metabolisms, sugarlevels_t = reproduce(L, v_min, v_max, m_min, m_max, s_min, s_max, positions_t, visions, metabolisms, sugarlevels_t, reproductionProbability)
