@@ -1,0 +1,15 @@
+Where we're at:
+- We have implemented the road, and the animals cannot cross it
+- Reproduction is possible
+
+Future plan:
+- Get classes to work
+- Make sure crossings work - meaning that the animals can cross the road if there is a crossing, and they can stand on the crossing but not on the road
+- Start simulating
+  - Simulate x times without road and take average of number of dead animals
+  - Simulate x times with road and take average of number of dead animals
+  - Simulate x times with road and crossings and take average of number of dead animals
+  - Repeat last step with different constillations of crossings
+    - Determine how many bridges/tunnels gives how many deaths
+    - Determine how many tunnels gives the same result as y bridges
+- Add predators
