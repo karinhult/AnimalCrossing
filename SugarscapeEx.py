@@ -7,6 +7,7 @@ from copy import deepcopy
 import time
 import random as rnd
 import itertools
+from Population import *
 
 def updateSugarArena(N, positions, sugarArena, growthRate, sproutRate, sugar_max):
     sugarArena_updated = deepcopy(sugarArena)
@@ -20,13 +21,6 @@ def updateSugarArena(N, positions, sugarArena, growthRate, sproutRate, sugar_max
     sugarArena_updated[positions[:,0], positions[:,1]] = 0
     sugarArena_updated = addRoad(L/2, 4, sugarArena_updated, -1)
     return sugarArena_updated
-
-def updateSugarLevels(positions, sugarlevels, metabolisms, visions, sugarArena):
-    sugarLevels_updated = np.copy(sugarlevels)
-    sugarInCell = (sugarArena[positions[:,0], positions[:,1]])[:,np.newaxis]
-    sugarLevels_updated += sugarInCell - metabolisms
-    survivors = np.where(sugarLevels_updated > 0)[0]
-    return positions[survivors,:], visions[survivors], metabolisms[survivors], sugarLevels_updated[survivors]
 
 def updatePositions(A, L, positions, visions, sugarArena):
     positions_updated = np.copy(positions)
@@ -61,7 +55,7 @@ def initializeSugarArena(L, plantProb, globalSugarMax):
     return sugarArena
 
 #Adds road
-def addRoad(pos, width, sugarArena, undesirability = -1):
+def addRoad(pos, width, sugarArena, undesirability):
     j1 = int(pos-width/2)
     j2 = int(pos+width/2)
     sugarArena[:,j1:j2] = undesirability
@@ -86,7 +80,7 @@ def reproduce(L, v_min, v_max, m_min, m_max, s_min, s_max, positions, visions, m
     if reproductionAmount > 0:
         adjacencies = list(np.apply_along_axis(np.add, 1, reproductionPositions, translations))
         for individualAdjacencies in adjacencies:
-            inRange = np.all(individualAdjacencies < L, axis=1)
+            inRange = np.all((individualAdjacencies < L) & (individualAdjacencies >= 0), axis=1)
             individualAdjacencies = individualAdjacencies[inRange]
             posList = [position for position in positions]
             individualAdjacencies = [reprPos for reprPos in individualAdjacencies.tolist() if reprPos not in positions.tolist()]
@@ -109,8 +103,7 @@ def getImage(positions, sugarArena, A, globalSugarMax):
     image[sugarArena < 0, :] = 75
     for a in range(A):
         image[int(positions[a,0]), int(positions[a,1]), :] = 255 # White agents
-    # breakpoint()
-    return np.transpose(image, (1, 0, 2))
+    return image
 
 imageDelay = 0.2
 def changeImageDelay(increase=True):
@@ -151,41 +144,40 @@ L = 50
 A = 100
 A_list = [A]
 globalSugarMax = 4
-v_min = 1
-v_max = 6
-m_min = 1
-m_max = 4
-s_min = 5
-s_max = 25
+visionRange = (1, 6)
+metabolismRange = (1, 4)
+sugarLevelRange = (5, 25)
 growthRate = 1
 sproutRate = 25
 reproductionProbability = 0.1
+undesirability = -1
 
 sugarArena_0 = initializeSugarArena(L, plantProb, globalSugarMax)
 sugar_max = np.ones([L,L])*globalSugarMax
 sugarArena_t = deepcopy(sugarArena_0)
-positions_0, visions, metabolisms, sugarlevels_0 = initializePrey(A, L, v_min, v_max, m_min, m_max, s_min, s_max)
+# positions_0, visions, metabolisms, sugarlevels_0 = initializePrey(A, L, v_min, v_max, m_min, m_max, s_min, s_max)
 
-positions_t = deepcopy(positions_0)
-sugarlevels_t = deepcopy(sugarlevels_0)
+population = Population(A, visionRange, metabolismRange, sugarLevelRange, sugarArena_t, undesirability)
+# positions_t = deepcopy(positions_0)
+# sugarlevels_t = deepcopy(sugarlevels_0)
 
 #plt.pcolor(np.flip(sugarArena_0, 0))
 #plt.show()
-for t in range(500):
-    positions_t = updatePositions(A, L, positions_t, visions, sugarArena_t)
-    positions_t, visions, metabolisms, sugarlevels_t = updateSugarLevels(positions_t, sugarlevels_t, metabolisms, visions, sugarArena_t)
-    positions_t, visions, metabolisms, sugarlevels_t = reproduce(L, v_min, v_max, m_min, m_max, s_min, s_max, positions_t, visions, metabolisms, sugarlevels_t, reproductionProbability)
-    A = len(sugarlevels_t)
+t = 0
+while True:
+    t += 1
+    A = len(population.prey)
     A_list.append(A)
 
-    image = getImage(positions_t, sugarArena_t, A, globalSugarMax)
+    image = getImage(population.positions, sugarArena_t, A, globalSugarMax)
     img = itk.PhotoImage(Image.fromarray(np.uint8(image),'RGB').resize((res, res), resample=Image.BOX))
     canvas.create_image(0, 0, anchor=NW, image=img)
-    tk.title('time=' + str(t) + ', alive agents=' + str(int(A)))
+    tk.title(f'Time: {t}. Agents: {A}')
     time.sleep(imageDelay)
     tk.update()
+    population.updatePositions(sugarArena_t, undesirability)
 
-    sugarArena_t = updateSugarArena(L, positions_t, sugarArena_t, growthRate, sproutRate, sugar_max)
+    sugarArena_t = updateSugarArena(L, population.positions, sugarArena_t, growthRate, sproutRate, sugar_max)
 
 Tk.mainloop(canvas)
 
