@@ -8,7 +8,7 @@ import time
 import random as rnd
 import itertools
 
-def updateSugarArena(N, positions, sugarArena, growthRate, sproutRate, sugar_max, roadWidth=4, roadValue=-1):
+def updateSugarArena(N, positions, sugarArena, growthRate, sproutRate, sugar_max, roadWidth=4, roadValue=-2):
     sugarArena_updated = deepcopy(sugarArena)
     nNewSugarPoints = np.random.poisson(sproutRate)
     newSugarPositions = np.random.randint(0, N, size=[nNewSugarPoints, 2])
