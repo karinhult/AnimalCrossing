@@ -8,7 +8,7 @@ import time
 import random as rnd
 import itertools
 
-def updateSugarArena(N, positions, sugarArena, growthRate, sproutRate, sugar_max):
+def updateSugarArena(N, positions, sugarArena, growthRate, sproutRate, sugar_max, roadWidth=4, roadValue=-1):
     sugarArena_updated = deepcopy(sugarArena)
     nNewSugarPoints = np.random.poisson(sproutRate)
     newSugarPositions = np.random.randint(0, N, size=[nNewSugarPoints, 2])
@@ -18,7 +18,7 @@ def updateSugarArena(N, positions, sugarArena, growthRate, sproutRate, sugar_max
     sugarArena_updated = np.minimum(sugarArena_updated, sugar_max)
 
     sugarArena_updated[positions[:,0], positions[:,1]] = 0
-    sugarArena_updated = addRoad(L/2, 4, sugarArena_updated, -1)
+    sugarArena_updated = addRoad(N/2, roadWidth, sugarArena_updated, roadValue)
     return sugarArena_updated
 
 def updateSugarLevels(positions, sugarlevels, metabolisms, visions, sugarArena):
@@ -54,10 +54,10 @@ def updatePositions(A, L, positions, visions, sugarArena):
                     notValidPosition = False
     return positions_updated
 
-def initializeSugarArena(L, plantProb, globalSugarMax):
+def initializeSugarArena(L, plantProb, globalSugarMax, roadWidth=4, roadValue=-1):
     # For later: Add different sugar maximums in different parts of the arena?
     sugarArena = np.random.randint(1,globalSugarMax, size=(L,L)) * (np.random.rand(L,L) < plantProb)
-    sugarArena = addRoad(L/2, 4, sugarArena, -1)
+    sugarArena = addRoad(L/2, roadWidth, sugarArena, roadValue)
     return sugarArena
 
 #Adds road
@@ -67,8 +67,8 @@ def addRoad(pos, width, sugarArena, undesirability = -1):
     sugarArena[:,j1:j2] = undesirability
     return sugarArena
 
-def initializePrey(A, N, v_min, v_max, m_min, m_max, s_min, s_max):
-    positions = np.random.randint(0, [N, int(N/2-4)], (A, 2))
+def initializePrey(A, N, v_min, v_max, m_min, m_max, s_min, s_max, roadWidth=4):
+    positions = np.random.randint(0, [N, int(N/2-roadWidth)], (A, 2))
     visions = np.random.randint(v_min, v_max+1, (A, 1))
     metabolisms = np.random.randint(m_min, m_max+1, (A, 1)).astype(float)
     sugarlevels = np.random.randint(s_min, s_max+1, (A, 1)).astype(float)
@@ -160,8 +160,10 @@ s_max = 25
 growthRate = 1
 sproutRate = 25
 reproductionProbability = 0.1
+roadWidth = 4
+roadValue = -2
 
-sugarArena_0 = initializeSugarArena(L, plantProb, globalSugarMax)
+sugarArena_0 = initializeSugarArena(L, plantProb, globalSugarMax, roadWidth, roadValue)
 sugar_max = np.ones([L,L])*globalSugarMax
 sugarArena_t = deepcopy(sugarArena_0)
 positions_0, visions, metabolisms, sugarlevels_0 = initializePrey(A, L, v_min, v_max, m_min, m_max, s_min, s_max)
@@ -170,31 +172,29 @@ positions_t = deepcopy(positions_0)
 sugarlevels_t = deepcopy(sugarlevels_0)
 
 t = 0
+
 image = getImage(positions_t, sugarArena_t, A, globalSugarMax)
 img = itk.PhotoImage(Image.fromarray(np.uint8(image),'RGB').resize((res, res), resample=Image.BOX))
 canvas.create_image(0, 0, anchor=NW, image=img)
 tk.title('time=' + str(t) + ', alive agents=' + str(int(A)))
 time.sleep(imageDelay)
 tk.update()
-#breakpoint()
 
-#plt.pcolor(np.flip(sugarArena_0, 0))
-#plt.show()
-for t in range(1,500):
+for t in range(500):
     positions_t = updatePositions(A, L, positions_t, visions, sugarArena_t)
     positions_t, visions, metabolisms, sugarlevels_t = updateSugarLevels(positions_t, sugarlevels_t, metabolisms, visions, sugarArena_t)
     positions_t, visions, metabolisms, sugarlevels_t = reproduce(L, v_min, v_max, m_min, m_max, s_min, s_max, positions_t, visions, metabolisms, sugarlevels_t, reproductionProbability)
     A = len(sugarlevels_t)
     A_list.append(A)
-
+    
     image = getImage(positions_t, sugarArena_t, A, globalSugarMax)
     img = itk.PhotoImage(Image.fromarray(np.uint8(image),'RGB').resize((res, res), resample=Image.BOX))
     canvas.create_image(0, 0, anchor=NW, image=img)
     tk.title('time=' + str(t) + ', alive agents=' + str(int(A)))
     time.sleep(imageDelay)
     tk.update()
-
-    sugarArena_t = updateSugarArena(L, positions_t, sugarArena_t, growthRate, sproutRate, sugar_max)
+    
+    sugarArena_t = updateSugarArena(L, positions_t, sugarArena_t, growthRate, sproutRate, sugar_max, roadWidth, roadValue)
 
 Tk.mainloop(canvas)
 
