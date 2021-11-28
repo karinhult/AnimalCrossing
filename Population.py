@@ -35,18 +35,26 @@ class Prey:
         self._position = value
 
 def getRoadWidth(sugarArena, undesirability): # Temporary
-    roadCorners = np.array([[dimension[0], dimension[-1]] for dimension in np.where(sugarArena == undesirability)]).T
-    roadWidth = np.diff(roadCorners, axis=0)[0][1]+1
-    if roadWidth >= np.shape(sugarArena)[0]:
-        raise Exception('Horizontal road')
+    if (sugarArena == undesirability).any():
+        roadCorners = np.array([[dimension[0], dimension[-1]] for dimension in np.where(sugarArena == undesirability)]).T
+        roadWidth = np.diff(roadCorners, axis=0)[0][1]+1
+        if roadWidth >= np.shape(sugarArena)[0]:
+            raise Exception('Horizontal road')
+    else:
+        roadWidth = 0
     return roadWidth
 
 class Population:
-    def __init__(self, preyAmount, visionRange, metabolismRange, sugarLevelRange, sugarArena, undesirability):
+    def __init__(self, preyAmount, visionRange, metabolismRange, sugarLevelRange, sugarArena, undesirability, oneSide=False):
         roadWidth = getRoadWidth(sugarArena, undesirability)
         arenaLength = np.shape(sugarArena)[0]
-        positions = np.random.randint((0,0), (arenaLength, arenaLength-roadWidth), (preyAmount, 2))
-        positions[:,1] = positions[:,1] + roadWidth*(positions[:,1] >= (arenaLength-roadWidth)/2)
+        if oneSide:
+            positions = np.random.randint((0,0), (arenaLength, int(arenaLength/2-roadWidth)), (preyAmount, 2))
+        else:
+            positions = np.random.randint(0, [N, int(N/2-roadWidth)], (A, 2))
+            positions = np.random.randint((0,0), (arenaLength, arenaLength-roadWidth), (preyAmount, 2))
+            positions[:,1] = positions[:,1] + roadWidth*(positions[:,1] >= (arenaLength-roadWidth)/2)
+            
 
         visions =     np.random.randint(visionRange[0], visionRange[1]+1, preyAmount)
         metabolisms = np.random.randint(metabolismRange[0], metabolismRange[1]+1, preyAmount)
