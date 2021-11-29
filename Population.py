@@ -185,7 +185,7 @@ class Population:
             # breakpoint()
 
     # Animals can give birth on the road
-    def reproduce(self, L, vRange, mRange, sRange, reproductionProbability):
+    def reproduce(self, L, vRange, mRange, sRange, reproductionProbability, hasRoad, roadWidth):
         reproductions = (np.random.rand(len(self.visions)) < reproductionProbability)
         reproductionAmount = np.sum(reproductions)
         reproductionPositions = self.positions[reproductions]
@@ -196,6 +196,8 @@ class Population:
             for individualAdjacencies in adjacencies:
                 inRange = np.all((individualAdjacencies < L) & (individualAdjacencies >= 0), axis=1)
                 individualAdjacencies = individualAdjacencies[inRange]
+                if hasRoad:
+                    individualAdjacencies = individualAdjacencies[(individualAdjacencies[:,1] < (L-roadWidth)/2) | (individualAdjacencies[:,1] > (L+roadWidth)/2)]
                 posList = [position for position in self.positions]
                 individualAdjacencies = [reprPos for reprPos in individualAdjacencies.tolist() if reprPos not in self.positions.tolist()]
                 chosenSpot = np.array(individualAdjacencies[np.random.randint(len(individualAdjacencies))])

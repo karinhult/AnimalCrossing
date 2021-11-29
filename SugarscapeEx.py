@@ -143,7 +143,7 @@ while True:
     dead = A - Anew
     dead_list.append(dead)
     
-    population.reproduce(L, visionRange, metabolismRange, sugarLevelRange, reproductionProbability)
+    population.reproduce(L, visionRange, metabolismRange, sugarLevelRange, reproductionProbability, hasRoad, roadWidth)
     born = len(population.prey) - Anew
     born_list.append(born)
 
