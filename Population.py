@@ -34,19 +34,8 @@ class Prey:
     def position(self, value):
         self._position = value
 
-def getRoadWidth(sugarArena, undesirability): # Temporary
-    if (sugarArena == undesirability).any():
-        roadCorners = np.array([[dimension[0], dimension[-1]] for dimension in np.where(sugarArena == undesirability)]).T
-        roadWidth = np.diff(roadCorners, axis=0)[0][1]+1
-        if roadWidth >= np.shape(sugarArena)[0]:
-            raise Exception('Horizontal road')
-    else:
-        roadWidth = 0
-    return roadWidth
-
 class Population:
-    def __init__(self, preyAmount, visionRange, metabolismRange, sugarLevelRange, sugarArena, undesirability, oneSide=False):
-        roadWidth = getRoadWidth(sugarArena, undesirability)
+    def __init__(self, preyAmount, visionRange, metabolismRange, sugarLevelRange, sugarArena, undesirability, roadWidth, oneSide=False):
         arenaLength = np.shape(sugarArena)[0]
         if oneSide:
             positions = np.random.randint((0,0), (arenaLength, int(arenaLength/2-roadWidth)), (preyAmount, 2))

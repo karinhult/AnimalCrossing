@@ -119,7 +119,7 @@ sugarArena_0 = initializeSugarArena(L, plantProb, globalSugarMax, roadWidth, roa
 sugar_max = np.ones([L,L])*globalSugarMax
 sugarArena_t = np.copy(sugarArena_0)
 
-population = Population(A, visionRange, metabolismRange, sugarLevelRange, sugarArena_t, undesirability, oneSide=oneSide)
+population = Population(A, visionRange, metabolismRange, sugarLevelRange, sugarArena_t, undesirability, roadWidth, oneSide=oneSide)
 
 t = 0
 dead_list = []
