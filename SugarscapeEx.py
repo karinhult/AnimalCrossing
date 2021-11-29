@@ -108,7 +108,7 @@ metabolismRange = (1, 4)
 sugarLevelRange = (5, 25)
 growthRate = 1
 sproutRate = 25
-reproductionProbability = 0.1
+reproductionProbability = 0.01
 roadWidth = 4
 roadValue = -2
 undesirability = -2
@@ -118,14 +118,9 @@ oneSide = True
 sugarArena_0 = initializeSugarArena(L, plantProb, globalSugarMax, roadWidth, roadValue, hasRoad=hasRoad)
 sugar_max = np.ones([L,L])*globalSugarMax
 sugarArena_t = np.copy(sugarArena_0)
-# positions_0, visions, metabolisms, sugarlevels_0 = initializePrey(A, L, v_min, v_max, m_min, m_max, s_min, s_max)
 
 population = Population(A, visionRange, metabolismRange, sugarLevelRange, sugarArena_t, undesirability, oneSide=oneSide)
-# positions_t = np.copy(positions_0)
-# sugarlevels_t = np.copy(sugarlevels_0)
 
-#plt.pcolor(np.flip(sugarArena_0, 0))
-#plt.show()
 t = 0
 while True:
     t += 1
@@ -138,8 +133,8 @@ while True:
     tk.title(f'Time: {t}. Agents: {A}')
     time.sleep(imageDelay)
     tk.update()
-    # population.updatePositions(sugarArena_t, undesirability)
     population.updatePositions(sugarArena_t, hasRoad=hasRoad)
+    population.removeDeadAnimals()
     population.reproduce(L, visionRange, metabolismRange, sugarLevelRange, reproductionProbability)
 
     sugarArena_t = updateSugarArena(L, population.positions, sugarArena_t, growthRate, sproutRate, sugar_max, undesirability, hasRoad = hasRoad)
