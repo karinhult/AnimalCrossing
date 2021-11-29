@@ -127,19 +127,24 @@ population = Population(A, visionRange, metabolismRange, sugarLevelRange, sugarA
 #plt.pcolor(np.flip(sugarArena_0, 0))
 #plt.show()
 t = 0
+dead_list = []
 while True:
     t += 1
     A = len(population.prey)
     A_list.append(A)
+    tot_dead = sum(dead_list)
 
     image = getImage(population.positions, sugarArena_t, A, globalSugarMax)
     img = itk.PhotoImage(Image.fromarray(np.uint8(image),'RGB').resize((res, res), resample=Image.BOX))
     canvas.create_image(0, 0, anchor=NW, image=img)
-    tk.title(f'Time: {t}. Agents: {A}')
+    tk.title(f'Time: {t}. Agents: {A}. Dead: {tot_dead}')
     time.sleep(imageDelay)
     tk.update()
     # population.updatePositions(sugarArena_t, undesirability)
     population.updatePositions(sugarArena_t, hasRoad=hasRoad)
+    dead = A - len(population.prey)
+    dead_list.append(dead)
+    
     population.reproduce(L, visionRange, metabolismRange, sugarLevelRange, reproductionProbability)
 
     sugarArena_t = updateSugarArena(L, population.positions, sugarArena_t, growthRate, sproutRate, sugar_max, undesirability, hasRoad = hasRoad)
