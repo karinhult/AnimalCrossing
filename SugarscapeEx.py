@@ -99,34 +99,29 @@ speedUp.place(relx=0.05, rely=.85, relheight=0.12, relwidth=0.15)
 speedDn = Button(tk, text='Speed down', command=changeImageDelay)
 speedDn.place(relx=0.2, rely=.85, relheight=0.12, relwidth=0.15)
 
-plantProb = 0.5 #
-L = 50  #
-A = 100     # don't save to file
-A_list = [A] # save as data
-globalSugarMax = 4#
-visionRange = (1, 6)#
-metabolismRange = (1, 4)#
-sugarLevelRange = (5, 25)#
-growthRate = 1#
-sproutRate = 25#
-reproductionProbability = 0.1#
-roadWidth = 4#
-roadValue = -2  # don't save to file
-undesirability = -2 # don't save to file
+plantProb = 0.5
+L = 50
+A = 100
+A_list = [A]
+globalSugarMax = 4
+visionRange = (1, 6)
+metabolismRange = (1, 4)
+sugarLevelRange = (5, 25)
+growthRate = 1
+sproutRate = 25
+reproductionProbability = 0.01
+roadWidth = 4
+roadValue = -2
+undesirability = -2
 hasRoad = True
 oneSide = True
 
 sugarArena_0 = initializeSugarArena(L, plantProb, globalSugarMax, roadWidth, roadValue, hasRoad=hasRoad)
 sugar_max = np.ones([L,L])*globalSugarMax
 sugarArena_t = np.copy(sugarArena_0)
-# positions_0, visions, metabolisms, sugarlevels_0 = initializePrey(A, L, v_min, v_max, m_min, m_max, s_min, s_max)
 
-population = Population(A, visionRange, metabolismRange, sugarLevelRange, sugarArena_t, undesirability, oneSide=oneSide)
-# positions_t = np.copy(positions_0)
-# sugarlevels_t = np.copy(sugarlevels_0)
+population = Population(A, visionRange, metabolismRange, sugarLevelRange, sugarArena_t, undesirability, roadWidth, oneSide=oneSide)
 
-#plt.pcolor(np.flip(sugarArena_0, 0))
-#plt.show()
 t = 0
 dead_list = []
 born_list = []
@@ -143,13 +138,13 @@ while True:
     tk.title(f'Time: {t}. Agents: {A}. Dead: {tot_dead}. Last born: {born}')
     time.sleep(imageDelay)
     tk.update()
-    # population.updatePositions(sugarArena_t, undesirability)
     population.updatePositions(sugarArena_t, hasRoad=hasRoad)
+    population.removeDeadAnimals()
     Anew = len(population.prey)
     dead = A - Anew
     dead_list.append(dead)
-    
-    population.reproduce(L, visionRange, metabolismRange, sugarLevelRange, reproductionProbability)
+
+    population.reproduce(L, visionRange, metabolismRange, sugarLevelRange, reproductionProbability, hasRoad, roadWidth)
     born = len(population.prey) - Anew
     born_list.append(born)
 
@@ -173,7 +168,7 @@ if saveDataToFile:
     dataWriter = csv.writer(outputFile, delimiter='\t')
 
     #put writing functions here
-    
+
     outputFile.close()
     print("\nResult saved in ", fileName)
 
