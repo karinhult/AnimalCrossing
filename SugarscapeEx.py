@@ -6,6 +6,7 @@ from PIL import ImageTk as itk
 import time
 import random as rnd
 import itertools
+import csv
 from Population import *
 
 def updateSugarArena(N, positions, sugarArena, growthRate, sproutRate, sugar_max, roadValue, roadWidth=4, hasRoad=True):
@@ -98,20 +99,20 @@ speedUp.place(relx=0.05, rely=.85, relheight=0.12, relwidth=0.15)
 speedDn = Button(tk, text='Speed down', command=changeImageDelay)
 speedDn.place(relx=0.2, rely=.85, relheight=0.12, relwidth=0.15)
 
-plantProb = 0.5
-L = 50
-A = 100
-A_list = [A]
-globalSugarMax = 4
-visionRange = (1, 6)
-metabolismRange = (1, 4)
-sugarLevelRange = (5, 25)
-growthRate = 1
-sproutRate = 25
-reproductionProbability = 0.1
-roadWidth = 4
-roadValue = -2
-undesirability = -2
+plantProb = 0.5 #
+L = 50  #
+A = 100     # don't save to file
+A_list = [A] # save as data
+globalSugarMax = 4#
+visionRange = (1, 6)#
+metabolismRange = (1, 4)#
+sugarLevelRange = (5, 25)#
+growthRate = 1#
+sproutRate = 25#
+reproductionProbability = 0.1#
+roadWidth = 4#
+roadValue = -2  # don't save to file
+undesirability = -2 # don't save to file
 hasRoad = True
 oneSide = True
 
@@ -156,6 +157,27 @@ while True:
     sugarArena_t = updateSugarArena(L, population.positions, sugarArena_t, growthRate, sproutRate, sugar_max, undesirability, hasRoad = hasRoad)
 
 Tk.mainloop(canvas)
+
+# NOTE: Not finished and has NOT been tested yet!!
+if saveDataToFile:
+    settings = [f"plantProb = {plantProb}", f"L = {L}", f"globalSugarMax = {globalSugarMax}", f"visionRange = {visionRange}",
+                f"metabolismRange = {metabolismRange}", f"sugarLevelRange = {sugarLevelRange}", f"growthRate = {growthRate}",
+                f"sproutRate = {sproutRate}", f"reproductionProbability = {reproductionProbability}", f"roadWidth = {roadWidth}",
+                f"hasRoad = {hasRoad}", f"oneSide = {oneSide}"]
+
+    data = np.array([A_list, dead_list, born_list]).T
+
+    dataHeader = ["A_list", "dead_list", "born_list"]
+    fileName = input("Name of data file: ")
+    outputFile = open(fileName, "w")
+    dataWriter = csv.writer(outputFile, delimiter='\t')
+
+    #put writing functions here
+    
+    outputFile.close()
+    print("\nResult saved in ", fileName)
+
+
 
 # plt.plot(A_list)
 # plt.show()
