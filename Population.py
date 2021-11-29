@@ -51,7 +51,6 @@ class Population:
         if oneSide:
             positions = np.random.randint((0,0), (arenaLength, int(arenaLength/2-roadWidth)), (preyAmount, 2))
         else:
-            positions = np.random.randint(0, [N, int(N/2-roadWidth)], (A, 2))
             positions = np.random.randint((0,0), (arenaLength, arenaLength-roadWidth), (preyAmount, 2))
             positions[:,1] = positions[:,1] + roadWidth*(positions[:,1] >= (arenaLength-roadWidth)/2)
             
