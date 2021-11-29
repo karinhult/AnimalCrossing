@@ -20,7 +20,7 @@ def updateSugarArena(L, positions, sugarArena, growthRate, sproutRate, sugar_max
 
     sugarArena_updated[positions[:,0], positions[:,1]] = 0
     if hasRoad:
-        sugarArena_updated = addRoad(L, roadWidth, sugarArena, roadValue, tunnelIndices, bridgeIndices, tunnelValue)
+        sugarArena_updated = addRoad(L, roadWidth, sugarArena_updated, roadValue, tunnelIndices, bridgeIndices, tunnelValue)
     return sugarArena_updated
 
 def updateSugarLevels(positions, sugarlevels, metabolisms, visions, sugarArena):
@@ -44,14 +44,17 @@ def addRoad(L, width, sugarArena, roadValue, tunnelIndices, bridgeIndices, tunne
     j2 = int((L+width)/2)
 
     roadIndices = np.arange(L)
+
     if len(bridgeIndices) > 0:
         noBridgeIndices = [index for index in roadIndices if index not in bridgeIndices]
     else:
         noBridgeIndices = roadIndices
 
     sugarArena[noBridgeIndices, j1:j2] = roadValue
+
     if len(tunnelIndices) > 0:
         sugarArena[tunnelIndices, j1:j2] = tunnelValue
+
     return sugarArena
 
 def initializePrey(A, N, v_min, v_max, m_min, m_max, s_min, s_max, roadWidth=4, oneSide=True):
@@ -70,7 +73,8 @@ def getImage(positions, sugarArena, A, globalSugarMax):
     image[:,:,1] = 175 # Green grass
     image[sugarArena > 0, :] = 0
     image[:,:,0] = (sugarArena * 1.5*255/globalSugarMax).astype(int) # Red food
-    image[sugarArena < 0, :] = 75
+    image[sugarArena < 0, :] = 150
+    image[sugarArena < -1, :] = 75
     for a in range(A):
         image[int(positions[a,0]), int(positions[a,1]), :] = 255 # White agents
     return image
@@ -88,6 +92,7 @@ def changeImageDelay(increase=True):
     currentDelay.delete('1.0', 'end')
     currentDelay.insert(END, f'Current delay: {"{0:.2g}".format(imageDelay)}')
     currentDelay.tag_add("center", "1.0", "end")
+
 
 res = 500  # Animation resolution
 tk = Tk()
@@ -119,7 +124,7 @@ metabolismRange = (1, 4)
 sugarLevelRange = (5, 25)
 growthRate = 1
 sproutRate = 25
-reproductionProbability = 0.1
+reproductionProbability = 0.01
 roadWidth = 4
 roadValue = -2
 tunnelValue = -1
@@ -127,50 +132,60 @@ hasRoad = True
 oneSide = True
 
 hasCrossings = True
-if hasCrossings:
+if hasCrossings and hasRoad:
     iRoadMin = int((L - roadWidth) / 2)
     iRoadMax = int((L + roadWidth) / 2 - 1)
-    bridgeIndices = np.array([L/2]).astype(int)
-    tunnelIndices = np.array([]).astype(int)
+    bridgeIndices = np.array([L/4]).astype(int)
+    tunnelIndices = np.array([3*L/4]).astype(int)
     crossingMin = np.zeros((len(tunnelIndices) + len(bridgeIndices), 2))
     crossingMax = np.zeros((len(tunnelIndices) + len(bridgeIndices), 2))
     for i in range(len(tunnelIndices)):
         crossingMin[i,:] = np.array([tunnelIndices[i], iRoadMin])
         crossingMax[i,:] = np.array([tunnelIndices[i], iRoadMax])
+    for i in range(len(bridgeIndices)):
         crossingMin[i+len(tunnelIndices), :] = np.array([bridgeIndices[i], iRoadMin])
         crossingMax[i+len(tunnelIndices), :] = np.array([bridgeIndices[i], iRoadMax])
-    sugarArena_0 = initializeSugarArena(L, plantProb, globalSugarMax, roadWidth, roadValue, hasRoad=True,
+    sugarArena_0 = initializeSugarArena(L, plantProb, globalSugarMax, roadWidth, roadValue, hasRoad=hasRoad,
                          tunnelIndices = tunnelIndices, bridgeIndices = bridgeIndices, tunnelValue = tunnelValue)
 else:
     sugarArena_0 = initializeSugarArena(L, plantProb, globalSugarMax, roadWidth, roadValue, hasRoad=hasRoad)
 sugar_max = np.ones([L,L])*globalSugarMax
 sugarArena_t = np.copy(sugarArena_0)
-# positions_0, visions, metabolisms, sugarlevels_0 = initializePrey(A, L, v_min, v_max, m_min, m_max, s_min, s_max)
 
-population = Population(A, visionRange, metabolismRange, sugarLevelRange, sugarArena_t, roadValue, oneSide=oneSide)
+population = Population(A, visionRange, metabolismRange, sugarLevelRange, sugarArena_t, roadValue, roadWidth, oneSide=oneSide)
 # positions_t = np.copy(positions_0)
 # sugarlevels_t = np.copy(sugarlevels_0)
 
-#plt.pcolor(np.flip(sugarArena_0, 0))
-#plt.show()
 t = 0
+dead_list = []
+born_list = []
+born = 0
 while True:
     t += 1
     A = len(population.prey)
     A_list.append(A)
+    tot_dead = sum(dead_list)
 
     image = getImage(population.positions, sugarArena_t, A, globalSugarMax)
     img = itk.PhotoImage(Image.fromarray(np.uint8(image),'RGB').resize((res, res), resample=Image.BOX))
     canvas.create_image(0, 0, anchor=NW, image=img)
-    tk.title(f'Time: {t}. Agents: {A}')
+    tk.title(f'Time: {t}. Agents: {A}. Dead: {tot_dead}. Last born: {born}')
     time.sleep(imageDelay)
     tk.update()
+
     # population.updatePositions(sugarArena_t, roadValue)
     if hasCrossings:
         population.updatePositions(sugarArena_t, hasRoad=hasRoad, crossingMin = crossingMin, crossingMax = crossingMax)
     else:
         population.updatePositions(sugarArena_t, hasRoad=hasRoad)
-    population.reproduce(L, visionRange, metabolismRange, sugarLevelRange, reproductionProbability)
+    population.removeDeadAnimals()
+    Anew = len(population.prey)
+    dead = A - Anew
+    dead_list.append(dead)
+
+    population.reproduce(L, visionRange, metabolismRange, sugarLevelRange, reproductionProbability, hasRoad, roadWidth)
+    born = len(population.prey) - Anew
+    born_list.append(born)
 
     if hasCrossings:
          sugarArena_t = updateSugarArena(L, population.positions, sugarArena_t, growthRate, sproutRate, sugar_max, roadValue, hasRoad = hasRoad,
