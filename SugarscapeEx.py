@@ -68,14 +68,14 @@ def initializePrey(A, N, v_min, v_max, m_min, m_max, s_min, s_max, roadWidth=4, 
     #can return prey and positions? if we want that
     return positions, visions, metabolisms, sugarlevels
 
-def getImage(positions, sugarArena, A, globalSugarMax):
+def getImage(positions, sugarArena, A, globalSugarMax, roadValue, tunnelValue):
     width = np.shape(sugarArena)[0]
     image = np.zeros((width, width, 3))
     image[:,:,1] = 175 # Green grass
     image[sugarArena > 0, :] = 0
     image[:,:,0] = (sugarArena * 1.5*255/globalSugarMax).astype(int) # Red food
-    image[sugarArena < 0, :] = 150
-    image[sugarArena < -1, :] = 75
+    image[sugarArena == tunnelValue, :] = 150
+    image[sugarArena == roadValue, :] = 75
     for a in range(A):
         image[int(positions[a,0]), int(positions[a,1]), :] = 255 # White agents
     return image
@@ -167,7 +167,7 @@ while True:
     A_list.append(A)
     tot_dead = sum(dead_list)
 
-    image = getImage(population.positions, sugarArena_t, A, globalSugarMax)
+    image = getImage(population.positions, sugarArena_t, A, globalSugarMax, roadValue, tunnelValue)
     img = itk.PhotoImage(Image.fromarray(np.uint8(image),'RGB').resize((res, res), resample=Image.BOX))
     canvas.create_image(0, 0, anchor=NW, image=img)
     tk.title(f'Time: {t}. Agents: {A}. Dead: {tot_dead}. Last born: {born}')
