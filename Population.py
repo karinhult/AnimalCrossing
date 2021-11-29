@@ -156,7 +156,6 @@ class Population:
             maxSugarPos = np.argwhere(sugarArena == np.amax(sugarArena[visibleIndices]))
             distance = np.linalg.norm(agent.position - maxSugarPos, axis=1)
             maxSugarPos = maxSugarPos[distance <= agent.vision, :]
-            # breakpoint()
             if maxSugarPos.size > 0:
                 if hasRoad:
                     positionChoice = self.chooseRoad(agent, maxSugarPos, crossingMin, crossingMax,
@@ -171,7 +170,6 @@ class Population:
                 agent.position = self.moveNotSugar(agent, sugarArena, iRoadMin, iRoadMax, crossingMin, crossingMax).astype(int)
             agent.sugarLevel += sugarArena[agent.position[0], agent.position[1]] - agent.metabolism
             sugarArena[agent.position[0], agent.position[1]] = 0
-            # breakpoint()
 
     # Animals can give birth on the road
     def reproduce(self, L, vRange, mRange, sRange, reproductionProbability, hasRoad, roadWidth):
