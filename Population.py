@@ -34,9 +34,9 @@ class Prey:
     def position(self, value):
         self._position = value
 
-def getRoadWidth(sugarArena, undesirability): # Temporary
-    if (sugarArena == undesirability).any():
-        roadCorners = np.array([[dimension[0], dimension[-1]] for dimension in np.where(sugarArena == undesirability)]).T
+def getRoadWidth(sugarArena, roadValue): # Temporary
+    if (sugarArena == roadValue).any():
+        roadCorners = np.array([[dimension[0], dimension[-1]] for dimension in np.where(sugarArena == roadValue)]).T
         roadWidth = np.diff(roadCorners, axis=0)[0][1]+1
         if roadWidth >= np.shape(sugarArena)[0]:
             raise Exception('Horizontal road')
@@ -45,8 +45,8 @@ def getRoadWidth(sugarArena, undesirability): # Temporary
     return roadWidth
 
 class Population:
-    def __init__(self, preyAmount, visionRange, metabolismRange, sugarLevelRange, sugarArena, undesirability, oneSide=False):
-        roadWidth = getRoadWidth(sugarArena, undesirability)
+    def __init__(self, preyAmount, visionRange, metabolismRange, sugarLevelRange, sugarArena, roadValue, oneSide=False):
+        roadWidth = getRoadWidth(sugarArena, roadValue)
         arenaLength = np.shape(sugarArena)[0]
         if oneSide:
             positions = np.random.randint((0,0), (arenaLength, int(arenaLength/2-roadWidth)), (preyAmount, 2))
@@ -142,9 +142,9 @@ class Population:
 
                 iLocalSugarList = np.array([])
                 possibilities = np.array([])
-                iLocalSugarList = np.append(iLocalSugarList, (iSameSide, iBridge, iDiffSide))
-                possibilities = np.append(possibilities, (pSameSide, pBridge, pDiffSide)) / np.sum(possibilities)
-
+                iLocalSugarList = np.append(iLocalSugarList, (iSameSide, iBridge, iDiffSide))[0]
+                possibilities = np.append(possibilities, (pSameSide, pBridge, pDiffSide))[0]
+                possibilities = possibilities / sum(possibilities)
                 positionChoice = np.random.choice(iLocalSugarList, 1, p=possibilities)[0]
             else:
                 iLocalSugarList = np.where(np.sign(localSugarList[:, 1] - iRoadMin) == np.sign(agent.position[1] - iRoadMin))[0]
@@ -163,7 +163,7 @@ class Population:
                         probCross = 0.1, roadWidth=4, roadValue=-2):
         L = np.shape(sugarArena)[0]
         iRoadMin = int((L - roadWidth)/2)
-        iRoadMax = int((L + roadWidth)/2)
+        iRoadMax = int((L + roadWidth)/2-1)
 
         globalSugarList = np.array(np.where(sugarArena > 0)).T
         for agent in np.random.permutation(self.prey):

@@ -2,7 +2,6 @@ Where we're at:
 - We have implemented the road, and the animals cannot cross it
 - Classes works
 - Reproduction works, except from road births
-
 - Implemented so that a simple parameter determines if there is a road
 - Implemented so that a simple parameter determines if the animals are on one or both sides of the road, also it seems animals can cross atm?
 

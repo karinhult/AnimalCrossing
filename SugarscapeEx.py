@@ -8,10 +8,11 @@ import random as rnd
 import itertools
 from Population import *
 
-def updateSugarArena(N, positions, sugarArena, growthRate, sproutRate, sugar_max, roadValue, roadWidth=4, hasRoad=True):
+def updateSugarArena(L, positions, sugarArena, growthRate, sproutRate, sugar_max, roadValue, roadWidth=4, hasRoad=True,
+                     tunnelIndices = np.array([]), bridgeIndices = np.array([]), tunnelValue = -1):
     sugarArena_updated = np.copy(sugarArena)
     nNewSugarPoints = np.random.poisson(sproutRate)
-    newSugarPositions = np.random.randint(0, N, size=[nNewSugarPoints, 2])
+    newSugarPositions = np.random.randint(0, L, size=[nNewSugarPoints, 2])
 
     sugarArena_updated[newSugarPositions[:,0], newSugarPositions[:,1]] += growthRate
 
@@ -19,7 +20,7 @@ def updateSugarArena(N, positions, sugarArena, growthRate, sproutRate, sugar_max
 
     sugarArena_updated[positions[:,0], positions[:,1]] = 0
     if hasRoad:
-        sugarArena_updated = addRoad(N/2, roadWidth, sugarArena_updated, roadValue)
+        sugarArena_updated = addRoad(L, roadWidth, sugarArena, roadValue, tunnelIndices, bridgeIndices, tunnelValue)
     return sugarArena_updated
 
 def updateSugarLevels(positions, sugarlevels, metabolisms, visions, sugarArena):
@@ -29,18 +30,28 @@ def updateSugarLevels(positions, sugarlevels, metabolisms, visions, sugarArena):
     survivors = np.where(sugarLevels_updated > 0)[0]
     return positions[survivors,:], visions[survivors], metabolisms[survivors], sugarLevels_updated[survivors]
 
-def initializeSugarArena(L, plantProb, globalSugarMax, roadWidth=4, roadValue=-2, hasRoad=True):
+def initializeSugarArena(L, plantProb, globalSugarMax, roadWidth=4, roadValue=-2, hasRoad=True,
+                         tunnelIndices = np.array([]), bridgeIndices = np.array([]), tunnelValue = -1):
     # For later: Add different sugar maximums in different parts of the arena?
     sugarArena = np.random.randint(1,globalSugarMax, size=(L,L)) * (np.random.rand(L,L) < plantProb)
     if hasRoad:
-        sugarArena = addRoad(L/2, roadWidth, sugarArena, roadValue)
+        sugarArena = addRoad(L, roadWidth, sugarArena, roadValue, tunnelIndices, bridgeIndices, tunnelValue)
     return sugarArena
 
 #Adds road
-def addRoad(pos, width, sugarArena, undesirability):
-    j1 = int(pos-width/2)
-    j2 = int(pos+width/2)
-    sugarArena[:, j1:j2] = undesirability
+def addRoad(L, width, sugarArena, roadValue, tunnelIndices, bridgeIndices, tunnelValue):
+    j1 = int((L-width)/2)
+    j2 = int((L+width)/2)
+
+    roadIndices = np.arange(L)
+    if len(bridgeIndices) > 0:
+        noBridgeIndices = [index for index in roadIndices if index not in bridgeIndices]
+    else:
+        noBridgeIndices = roadIndices
+
+    sugarArena[noBridgeIndices, j1:j2] = roadValue
+    if len(tunnelIndices) > 0:
+        sugarArena[tunnelIndices, j1:j2] = tunnelValue
     return sugarArena
 
 def initializePrey(A, N, v_min, v_max, m_min, m_max, s_min, s_max, roadWidth=4, oneSide=True):
@@ -111,16 +122,32 @@ sproutRate = 25
 reproductionProbability = 0.1
 roadWidth = 4
 roadValue = -2
-undesirability = -2
+tunnelValue = -1
 hasRoad = True
 oneSide = True
 
-sugarArena_0 = initializeSugarArena(L, plantProb, globalSugarMax, roadWidth, roadValue, hasRoad=hasRoad)
+hasCrossings = True
+if hasCrossings:
+    iRoadMin = int((L - roadWidth) / 2)
+    iRoadMax = int((L + roadWidth) / 2 - 1)
+    bridgeIndices = np.array([L/2]).astype(int)
+    tunnelIndices = np.array([]).astype(int)
+    crossingMin = np.zeros((len(tunnelIndices) + len(bridgeIndices), 2))
+    crossingMax = np.zeros((len(tunnelIndices) + len(bridgeIndices), 2))
+    for i in range(len(tunnelIndices)):
+        crossingMin[i,:] = np.array([tunnelIndices[i], iRoadMin])
+        crossingMax[i,:] = np.array([tunnelIndices[i], iRoadMax])
+        crossingMin[i+len(tunnelIndices), :] = np.array([bridgeIndices[i], iRoadMin])
+        crossingMax[i+len(tunnelIndices), :] = np.array([bridgeIndices[i], iRoadMax])
+    sugarArena_0 = initializeSugarArena(L, plantProb, globalSugarMax, roadWidth, roadValue, hasRoad=True,
+                         tunnelIndices = tunnelIndices, bridgeIndices = bridgeIndices, tunnelValue = tunnelValue)
+else:
+    sugarArena_0 = initializeSugarArena(L, plantProb, globalSugarMax, roadWidth, roadValue, hasRoad=hasRoad)
 sugar_max = np.ones([L,L])*globalSugarMax
 sugarArena_t = np.copy(sugarArena_0)
 # positions_0, visions, metabolisms, sugarlevels_0 = initializePrey(A, L, v_min, v_max, m_min, m_max, s_min, s_max)
 
-population = Population(A, visionRange, metabolismRange, sugarLevelRange, sugarArena_t, undesirability, oneSide=oneSide)
+population = Population(A, visionRange, metabolismRange, sugarLevelRange, sugarArena_t, roadValue, oneSide=oneSide)
 # positions_t = np.copy(positions_0)
 # sugarlevels_t = np.copy(sugarlevels_0)
 
@@ -138,11 +165,18 @@ while True:
     tk.title(f'Time: {t}. Agents: {A}')
     time.sleep(imageDelay)
     tk.update()
-    # population.updatePositions(sugarArena_t, undesirability)
-    population.updatePositions(sugarArena_t, hasRoad=hasRoad)
+    # population.updatePositions(sugarArena_t, roadValue)
+    if hasCrossings:
+        population.updatePositions(sugarArena_t, hasRoad=hasRoad, crossingMin = crossingMin, crossingMax = crossingMax)
+    else:
+        population.updatePositions(sugarArena_t, hasRoad=hasRoad)
     population.reproduce(L, visionRange, metabolismRange, sugarLevelRange, reproductionProbability)
 
-    sugarArena_t = updateSugarArena(L, population.positions, sugarArena_t, growthRate, sproutRate, sugar_max, undesirability, hasRoad = hasRoad)
+    if hasCrossings:
+         sugarArena_t = updateSugarArena(L, population.positions, sugarArena_t, growthRate, sproutRate, sugar_max, roadValue, hasRoad = hasRoad,
+                     tunnelIndices = tunnelIndices, bridgeIndices = bridgeIndices, tunnelValue = tunnelValue)
+    else:
+        sugarArena_t = updateSugarArena(L, population.positions, sugarArena_t, growthRate, sproutRate, sugar_max, roadValue, hasRoad = hasRoad)
 
 Tk.mainloop(canvas)
 
