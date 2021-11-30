@@ -4,10 +4,10 @@ Where we're at:
 - Reproduction works, except from road births
 - Implemented so that a simple parameter determines if there is a road
 - Implemented so that a simple parameter determines if the animals are on one or both sides of the road, also it seems animals can cross atm?
-
-Future plan:
 - Implement so that a simple parameter determines if there are crossings
 - Make sure crossings work - meaning that the animals can cross the road if there is a crossing, and they can stand on the crossing but not on the road
+
+Future plan:
 - Start simulating
   - Simulate x times without road and take average of number of dead animals
   - Simulate x times with road and take average of number of dead animals

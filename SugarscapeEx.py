@@ -71,9 +71,9 @@ def initializePrey(A, N, v_min, v_max, m_min, m_max, s_min, s_max, roadWidth=4, 
 def getImage(positions, sugarArena, A, globalSugarMax, roadValue, tunnelValue):
     width = np.shape(sugarArena)[0]
     image = np.zeros((width, width, 3))
-    image[:,:,1] = 175 # Green grass
+    image[:,:,0] = 175 # Red soil
     image[sugarArena > 0, :] = 0
-    image[:,:,0] = (sugarArena * 1.5*255/globalSugarMax).astype(int) # Red food
+    image[:,:,1] = (sugarArena *(1-1.5*255)/globalSugarMax).astype(int) # Green food
     image[sugarArena == tunnelValue, :] = 150
     image[sugarArena == roadValue, :] = 75
     for a in range(A):
@@ -116,11 +116,11 @@ speedDn = Button(tk, text='Speed down', command=changeImageDelay)
 speedDn.place(relx=0.2, rely=.85, relheight=0.12, relwidth=0.15)
 
 plantProb = 0.5
-L = 50
+L = 100
 A = 100
 A_list = [A]
 globalSugarMax = 4
-visionRange = (1, 6)
+visionRange = (3, 8)
 metabolismRange = (1, 4)
 sugarLevelRange = (5, 25)
 growthRate = 1
@@ -131,6 +131,7 @@ roadValue = -2
 tunnelValue = -1
 hasRoad = True
 oneSide = True
+saveDataToFile = False
 
 hasCrossings = True
 if hasCrossings and hasRoad:
@@ -161,11 +162,9 @@ t = 0
 dead_list = []
 born_list = []
 born = 0
-while True:
+tot_dead = sum(dead_list)
+while t<1.2e2:
     t += 1
-    A = len(population.prey)
-    A_list.append(A)
-    tot_dead = sum(dead_list)
 
     image = getImage(population.positions, sugarArena_t, A, globalSugarMax, roadValue, tunnelValue)
     img = itk.PhotoImage(Image.fromarray(np.uint8(image),'RGB').resize((res, res), resample=Image.BOX))
@@ -194,8 +193,13 @@ while True:
     else:
         sugarArena_t = updateSugarArena(L, population.positions, sugarArena_t, growthRate, sproutRate, sugar_max, roadValue, hasRoad = hasRoad)
 
+    A = len(population.prey)
+    A_list.append(A)
+    tot_dead = sum(dead_list)
+tk.destroy()
 Tk.mainloop(canvas)
 
+print(str(A))
 # NOTE: Not finished and has NOT been tested yet!!
 if saveDataToFile:
     settings = [f"plantProb = {plantProb}", f"L = {L}", f"globalSugarMax = {globalSugarMax}", f"visionRange = {visionRange}",
