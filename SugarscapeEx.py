@@ -124,15 +124,15 @@ visionRange = (3, 8)
 metabolismRange = (1, 3)
 sugarLevelRange = (5, 25)
 growthRate = 2
-sproutRate = 5
+sproutRate = 10
 reproductionProbability = 0.01
 maxSugar = 20
 roadWidth = 4
 roadValue = -2
 tunnelValue = -1
-hasRoad = True
-oneSide = True
-saveDataToFile = False
+hasRoad = False
+oneSide = False
+saveDataToFile = True
 
 hasCrossings = False
 if hasCrossings and hasRoad:
@@ -164,7 +164,7 @@ dead_list = []
 born_list = []
 born = 0
 tot_dead = sum(dead_list)
-while t>-1:
+while t<100:
     t += 1
 
     image = getImage(population.positions, sugarArena_t, A, globalSugarMax, roadValue, tunnelValue)
@@ -206,15 +206,18 @@ if saveDataToFile:
     settings = [f"plantProb = {plantProb}", f"L = {L}", f"globalSugarMax = {globalSugarMax}", f"visionRange = {visionRange}",
                 f"metabolismRange = {metabolismRange}", f"sugarLevelRange = {sugarLevelRange}", f"growthRate = {growthRate}",
                 f"sproutRate = {sproutRate}", f"reproductionProbability = {reproductionProbability}", f"roadWidth = {roadWidth}",
-                f"hasRoad = {hasRoad}", f"oneSide = {oneSide}"]
+                f"hasRoad = {hasRoad}", f"oneSide = {oneSide}", f"hasCrossings = {hasCrossings}"]
 
     data = np.array([A_list, dead_list, born_list]).T
 
-    dataHeader = ["A_list", "dead_list", "born_list"]
+    dataHeader = "A_list: \n"
     fileName = input("Name of data file: ")
     outputFile = open(fileName, "w")
-    dataWriter = csv.writer(outputFile, delimiter='\t')
-
+    for item in settings:
+        outputFile.write(item + "\n")
+    outputFile.write(dataHeader)
+    dataWriter = csv.writer(outputFile)
+    dataWriter.writerow(A_list)
     #put writing functions here
 
     outputFile.close()
