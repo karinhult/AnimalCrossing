@@ -71,7 +71,7 @@ def initializePrey(A, N, v_min, v_max, m_min, m_max, s_min, s_max, roadWidth=4, 
 def getImage(positions, sugarArena, A, globalSugarMax, roadValue, tunnelValue):
     width = np.shape(sugarArena)[0]
     image = np.zeros((width, width, 3))
-    image[:,:,0] = 175 # Red soil
+    image[:,:,0] = 0 # black soil
     image[sugarArena > 0, :] = 0
     image[:,:,1] = (sugarArena *(1-1.5*255)/globalSugarMax).astype(int) # Green food
     image[sugarArena == tunnelValue, :] = 150
@@ -133,8 +133,8 @@ tunnelValue = -1
 hasRoad = True
 oneSide = True
 saveDataToFile = False
-
 hasCrossings = False
+
 if hasCrossings and hasRoad:
     iRoadMin = int((L - roadWidth) / 2)
     iRoadMax = int((L + roadWidth) / 2 - 1)
