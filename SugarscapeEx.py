@@ -7,7 +7,10 @@ import time
 import random as rnd
 import itertools
 import csv
+from datetime import datetime
+import os
 from Population import *
+
 
 def updateSugarArena(L, positions, sugarArena, growthRate, sproutRate, sugar_max, roadValue, roadWidth=4, hasRoad=True,
                      tunnelIndices = np.array([]), bridgeIndices = np.array([]), tunnelValue = -1):
@@ -75,7 +78,7 @@ def getImage(positions, sugarArena, A, globalSugarMax, roadValue, tunnelValue):
     image[sugarArena > 0, :] = 0
     image[:,:,1] = (sugarArena *255 * 1.5/globalSugarMax).astype(int) # Green food
     image[sugarArena == tunnelValue, :] = 150
-    image[sugarArena == roadValue, :] = 75
+    image[sugarArena == roadValue, :] = 100
     for a in range(A):
         image[int(positions[a,0]), int(positions[a,1]), :] = 255 # White agents
     return image
@@ -97,7 +100,6 @@ def changeImageDelay(increase=True):
 plantProb = 0.05
 L = 150
 A = 30
-A_list = [A]
 globalSugarMax = 4
 visionRange = (5, 10)
 metabolismRange = (1, 3)
@@ -109,122 +111,139 @@ maxSugar = 20
 roadWidth = 4
 roadValue = -2
 tunnelValue = -1
+runs = 10
 hasRoad = True
 oneSide = True
 hasCrossings = True
 bridgeIndices = np.array([L/4]).astype(int)
 tunnelIndices = np.array([3*L/4]).astype(int)
-saveDataToFile = False
-animateSimulation = True
+saveDataToFile = True
+animateSimulation = False
 
-if animateSimulation:
-    res = 500  # Animation resolution
-    tk = Tk()
-    tk.geometry(str(int(res * 1.1)) + 'x' + str(int(res * 1.3)))
-    tk.configure(background='white')
-
-    canvas = Canvas(tk, bd=2)  # Generate animation window
-    tk.attributes('-topmost', 0)
-    canvas.place(x=res / 20, y=res / 20, height=res, width=res)
-    ccolor = ['#0008FF', '#DB0000', '#12F200']
-
-    currentDelay = Text(tk)
-    currentDelay.tag_configure("center", justify='center')
-    currentDelay.insert('1.0', f'Current delay: {imageDelay}')
-    currentDelay.tag_add("center", "1.0", "end")
-    currentDelay.place(relx=0.05, rely=.81, relheight=0.04, relwidth=0.3)
-    speedUp = Button(tk, text='Speed up', command=lambda: changeImageDelay(False))
-    speedUp.place(relx=0.05, rely=.85, relheight=0.12, relwidth=0.15)
-    speedDn = Button(tk, text='Speed down', command=changeImageDelay)
-    speedDn.place(relx=0.2, rely=.85, relheight=0.12, relwidth=0.15)
-
-if hasCrossings and hasRoad:
-    iRoadMin = int((L - roadWidth) / 2)
-    iRoadMax = int((L + roadWidth) / 2 - 1)
-    crossingMin = np.zeros((len(tunnelIndices) + len(bridgeIndices), 2))
-    crossingMax = np.zeros((len(tunnelIndices) + len(bridgeIndices), 2))
-    for i in range(len(tunnelIndices)):
-        crossingMin[i,:] = np.array([tunnelIndices[i], iRoadMin])
-        crossingMax[i,:] = np.array([tunnelIndices[i], iRoadMax])
-    for i in range(len(bridgeIndices)):
-        crossingMin[i+len(tunnelIndices), :] = np.array([bridgeIndices[i], iRoadMin])
-        crossingMax[i+len(tunnelIndices), :] = np.array([bridgeIndices[i], iRoadMax])
-    sugarArena_0 = initializeSugarArena(L, plantProb, globalSugarMax, roadWidth, roadValue, hasRoad=hasRoad,
-                         tunnelIndices = tunnelIndices, bridgeIndices = bridgeIndices, tunnelValue = tunnelValue)
-else:
-    sugarArena_0 = initializeSugarArena(L, plantProb, globalSugarMax, roadWidth, roadValue, hasRoad=hasRoad)
-sugar_max = np.ones([L,L])*globalSugarMax
-sugarArena_t = np.copy(sugarArena_0)
-
-population = Population(A, visionRange, metabolismRange, sugarLevelRange, sugarArena_t, roadValue, roadWidth, oneSide=oneSide)
-# positions_t = np.copy(positions_0)
-# sugarlevels_t = np.copy(sugarlevels_0)
-
-t = 0
-dead_list = []
-born_list = []
-born = 0
-tot_dead = sum(dead_list)
-while t<2e3:
-    t += 1
-    if animateSimulation:
-        image = getImage(population.positions, sugarArena_t, A, globalSugarMax, roadValue, tunnelValue)
-        img = itk.PhotoImage(Image.fromarray(np.uint8(image),'RGB').resize((res, res), resample=Image.BOX))
-        canvas.create_image(0, 0, anchor=NW, image=img)
-        tk.title(f'Time: {t}. Agents: {A}. Dead: {tot_dead}. Last born: {born}')
-        time.sleep(imageDelay)
-        tk.update()
-
-    # population.updatePositions(sugarArena_t, roadValue)
-    if hasCrossings:
-        population.updatePositions(sugarArena_t, hasRoad=hasRoad, crossingMin = crossingMin, crossingMax = crossingMax, maxSugar = maxSugar)
-    else:
-        population.updatePositions(sugarArena_t, hasRoad=hasRoad, maxSugar = maxSugar)
-    population.removeDeadAnimals()
-    Anew = len(population.prey)
-    dead = A - Anew
-    dead_list.append(dead)
-
-    population.reproduce(L, visionRange, metabolismRange, sugarLevelRange, reproductionProbability, hasRoad, roadWidth)
-    born = len(population.prey) - Anew
-    born_list.append(born)
-
-    if hasCrossings:
-         sugarArena_t = updateSugarArena(L, population.positions, sugarArena_t, growthRate, sproutRate, sugar_max, roadValue, hasRoad = hasRoad,
-                     tunnelIndices = tunnelIndices, bridgeIndices = bridgeIndices, tunnelValue = tunnelValue)
-    else:
-        sugarArena_t = updateSugarArena(L, population.positions, sugarArena_t, growthRate, sproutRate, sugar_max, roadValue, hasRoad = hasRoad)
-
-    A = len(population.prey)
-    A_list.append(A)
-    tot_dead = sum(dead_list)
-if animateSimulation:
-    tk.destroy()
-    Tk.mainloop(canvas)
-
-print(str(A))
-# NOTE: Not finished and has NOT been tested yet!!
 if saveDataToFile:
-    settings = [f"plantProb = {plantProb}", f"L = {L}", f"globalSugarMax = {globalSugarMax}", f"visionRange = {visionRange}",
-                f"metabolismRange = {metabolismRange}", f"sugarLevelRange = {sugarLevelRange}", f"growthRate = {growthRate}",
-                f"sproutRate = {sproutRate}", f"reproductionProbability = {reproductionProbability}", f"roadWidth = {roadWidth}",
-                f"hasRoad = {hasRoad}", f"oneSide = {oneSide}"]
+    # Create target Directory
+    # dd/mm/YY H:M:S
+    now = datetime.now()
+    dt_string = now.strftime("%Y-%m-%d_%H.%M.%S")
+    dirName = 'Results/' + dt_string
+    os.mkdir(dirName)
+    print("Directory ", dirName, " Created ")
 
-    data = np.array([A_list, dead_list, born_list]).T
+for hasRoad, hasCrossings in zip([False, True, True], [False, False, True]):
+    for run in range(runs):
+        if animateSimulation:
+            res = 500  # Animation resolution
+            tk = Tk()
+            tk.geometry(str(int(res * 1.1)) + 'x' + str(int(res * 1.3)))
+            tk.configure(background='white')
 
-    dataHeader = ["A_list", "dead_list", "born_list"]
-    fileName = input("Name of data file: ")
-    outputFile = open(fileName, "w")
-    dataWriter = csv.writer(outputFile, delimiter='\t')
+            canvas = Canvas(tk, bd=2)  # Generate animation window
+            tk.attributes('-topmost', 0)
+            canvas.place(x=res / 20, y=res / 20, height=res, width=res)
+            ccolor = ['#0008FF', '#DB0000', '#12F200']
 
-    #put writing functions here
+            currentDelay = Text(tk)
+            currentDelay.tag_configure("center", justify='center')
+            currentDelay.insert('1.0', f'Current delay: {imageDelay}')
+            currentDelay.tag_add("center", "1.0", "end")
+            currentDelay.place(relx=0.05, rely=.81, relheight=0.04, relwidth=0.3)
+            speedUp = Button(tk, text='Speed up', command=lambda: changeImageDelay(False))
+            speedUp.place(relx=0.05, rely=.85, relheight=0.12, relwidth=0.15)
+            speedDn = Button(tk, text='Speed down', command=changeImageDelay)
+            speedDn.place(relx=0.2, rely=.85, relheight=0.12, relwidth=0.15)
 
-    outputFile.close()
-    print("\nResult saved in ", fileName)
+        if hasCrossings and hasRoad:
+            iRoadMin = int((L - roadWidth) / 2)
+            iRoadMax = int((L + roadWidth) / 2 - 1)
+            crossingMin = np.zeros((len(tunnelIndices) + len(bridgeIndices), 2))
+            crossingMax = np.zeros((len(tunnelIndices) + len(bridgeIndices), 2))
+            for i in range(len(tunnelIndices)):
+                crossingMin[i,:] = np.array([tunnelIndices[i], iRoadMin])
+                crossingMax[i,:] = np.array([tunnelIndices[i], iRoadMax])
+            for i in range(len(bridgeIndices)):
+                crossingMin[i+len(tunnelIndices), :] = np.array([bridgeIndices[i], iRoadMin])
+                crossingMax[i+len(tunnelIndices), :] = np.array([bridgeIndices[i], iRoadMax])
+            sugarArena_0 = initializeSugarArena(L, plantProb, globalSugarMax, roadWidth, roadValue, hasRoad=hasRoad,
+                                 tunnelIndices = tunnelIndices, bridgeIndices = bridgeIndices, tunnelValue = tunnelValue)
+        else:
+            sugarArena_0 = initializeSugarArena(L, plantProb, globalSugarMax, roadWidth, roadValue, hasRoad=hasRoad)
+        sugar_max = np.ones([L,L])*globalSugarMax
+        sugarArena_t = np.copy(sugarArena_0)
 
+        population = Population(A, visionRange, metabolismRange, sugarLevelRange, sugarArena_t, roadValue, roadWidth, oneSide=oneSide)
+        # positions_t = np.copy(positions_0)
+        # sugarlevels_t = np.copy(sugarlevels_0)
 
+        t = 0
+        A_list = [A]
+        dead_list = []
+        born_list = []
+        born = 0
+        tot_dead = sum(dead_list)
+        while t<2e3:
+            t += 1
+            if animateSimulation:
+                image = getImage(population.positions, sugarArena_t, A, globalSugarMax, roadValue, tunnelValue)
+                img = itk.PhotoImage(Image.fromarray(np.uint8(image),'RGB').resize((res, res), resample=Image.BOX))
+                canvas.create_image(0, 0, anchor=NW, image=img)
+                tk.title(f'Time: {t}. Agents: {A}. Dead: {tot_dead}. Last born: {born}')
+                time.sleep(imageDelay)
+                tk.update()
 
-# plt.plot(A_list)
-# plt.show()
+            # population.updatePositions(sugarArena_t, roadValue)
+            if hasCrossings:
+                population.updatePositions(sugarArena_t, hasRoad=hasRoad, crossingMin = crossingMin, crossingMax = crossingMax, maxSugar = maxSugar)
+            else:
+                population.updatePositions(sugarArena_t, hasRoad=hasRoad, maxSugar = maxSugar)
+            population.removeDeadAnimals()
+            Anew = len(population.prey)
+            dead = A - Anew
+            dead_list.append(dead)
+
+            population.reproduce(L, visionRange, metabolismRange, sugarLevelRange, reproductionProbability, hasRoad, roadWidth)
+            born = len(population.prey) - Anew
+            born_list.append(born)
+
+            if hasCrossings:
+                 sugarArena_t = updateSugarArena(L, population.positions, sugarArena_t, growthRate, sproutRate, sugar_max, roadValue, hasRoad = hasRoad,
+                             tunnelIndices = tunnelIndices, bridgeIndices = bridgeIndices, tunnelValue = tunnelValue)
+            else:
+                sugarArena_t = updateSugarArena(L, population.positions, sugarArena_t, growthRate, sproutRate, sugar_max, roadValue, hasRoad = hasRoad)
+
+            A = len(population.prey)
+            A_list.append(A)
+            tot_dead = sum(dead_list)
+        if animateSimulation:
+            tk.destroy()
+            Tk.mainloop(canvas)
+
+        A_list = np.array(A_list).T
+        # NOTE: Not finished and has NOT been tested yet!!
+        if saveDataToFile:
+            settings = [f"plantProb = {plantProb}", f"L = {L}", f"globalSugarMax = {globalSugarMax}", f"visionRange = {visionRange}",
+                        f"metabolismRange = {metabolismRange}", f"sugarLevelRange = {sugarLevelRange}", f"growthRate = {growthRate}",
+                        f"sproutRate = {sproutRate}", f"reproductionProbability = {reproductionProbability}", f"roadWidth = {roadWidth}",
+                        f"hasRoad = {hasRoad}", f"oneSide = {oneSide}", f"hasCrossings = {hasCrossings}"]
+
+            dataHeader = "A_list: \n"
+            fileName = dirName + '/'
+            if hasRoad and hasCrossings:
+                fileName += 'roadAndCrossings'
+            elif hasRoad:
+                fileName += 'road'
+            else:
+                fileName += 'noRoad'
+            fileName += '_run' + str(int(run+1)) + '.csv'
+            outputFile = open(fileName, "w")
+            for item in settings:
+                outputFile.write(item + "\n")
+            outputFile.write(dataHeader)
+            dataWriter = csv.writer(outputFile)
+            dataWriter.writerow(A_list)
+            #put writing functions here
+
+            outputFile.close()
+            print("\nResult saved in ", fileName)
+
 
 #'''
