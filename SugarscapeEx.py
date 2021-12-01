@@ -117,7 +117,7 @@ speedDn.place(relx=0.2, rely=.85, relheight=0.12, relwidth=0.15)
 
 plantProb = 0.5
 L = 100
-A = 100
+A = 30
 A_list = [A]
 globalSugarMax = 4
 visionRange = (3, 8)
@@ -163,7 +163,7 @@ dead_list = []
 born_list = []
 born = 0
 tot_dead = sum(dead_list)
-while t<1.2e2:
+while t<1.2e3:
     t += 1
 
     image = getImage(population.positions, sugarArena_t, A, globalSugarMax, roadValue, tunnelValue)
