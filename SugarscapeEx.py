@@ -117,15 +117,16 @@ speedDn.place(relx=0.2, rely=.85, relheight=0.12, relwidth=0.15)
 
 plantProb = 0.5
 L = 100
-A = 100
+A = 25
 A_list = [A]
 globalSugarMax = 4
 visionRange = (3, 8)
-metabolismRange = (1, 4)
+metabolismRange = (1, 3)
 sugarLevelRange = (5, 25)
-growthRate = 1
-sproutRate = 25
+growthRate = 2
+sproutRate = 5
 reproductionProbability = 0.01
+maxSugar = 20
 roadWidth = 4
 roadValue = -2
 tunnelValue = -1
@@ -133,7 +134,7 @@ hasRoad = True
 oneSide = True
 saveDataToFile = False
 
-hasCrossings = True
+hasCrossings = False
 if hasCrossings and hasRoad:
     iRoadMin = int((L - roadWidth) / 2)
     iRoadMax = int((L + roadWidth) / 2 - 1)
@@ -163,7 +164,7 @@ dead_list = []
 born_list = []
 born = 0
 tot_dead = sum(dead_list)
-while t<1.2e2:
+while t>-1:
     t += 1
 
     image = getImage(population.positions, sugarArena_t, A, globalSugarMax, roadValue, tunnelValue)
@@ -175,9 +176,9 @@ while t<1.2e2:
 
     # population.updatePositions(sugarArena_t, roadValue)
     if hasCrossings:
-        population.updatePositions(sugarArena_t, hasRoad=hasRoad, crossingMin = crossingMin, crossingMax = crossingMax)
+        population.updatePositions(sugarArena_t, hasRoad=hasRoad, crossingMin = crossingMin, crossingMax = crossingMax, maxSugar = maxSugar)
     else:
-        population.updatePositions(sugarArena_t, hasRoad=hasRoad)
+        population.updatePositions(sugarArena_t, hasRoad=hasRoad, maxSugar = maxSugar)
     population.removeDeadAnimals()
     Anew = len(population.prey)
     dead = A - Anew

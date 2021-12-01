@@ -42,7 +42,7 @@ class Population:
         else:
             positions = np.random.randint((0,0), (arenaLength, arenaLength-roadWidth), (preyAmount, 2))
             positions[:,1] = positions[:,1] + roadWidth*(positions[:,1] >= (arenaLength-roadWidth)/2)
-            
+
 
         visions =     np.random.randint(visionRange[0], visionRange[1]+1, preyAmount)
         metabolisms = np.random.randint(metabolismRange[0], metabolismRange[1]+1, preyAmount)
@@ -156,13 +156,17 @@ class Population:
         return positionChoice
 
     def updatePositions(self, sugarArena, hasRoad=False, crossingMin=np.array([]), crossingMax=np.array([]),
-                        probCross=0.1, roadWidth=4, roadValue=-2):
+                        probCross=0.1, roadWidth=4, roadValue=-2, maxSugar=20):
         L = np.shape(sugarArena)[0]
         iRoadMin = int((L - roadWidth) / 2)
         iRoadMax = int((L + roadWidth) / 2 - 1)
 
         globalSugarList = np.array(np.where(sugarArena > 0)).T
         for agent in np.random.permutation(self.prey):
+            if agent.sugarLevel > maxSugar:
+                agent.position = self.moveNotSugar(agent, sugarArena, iRoadMin, iRoadMax, crossingMin,
+                                                           crossingMax, roadValue).astype(int)
+                continue
             distance = np.linalg.norm(agent.position - globalSugarList[:, :], axis=1)
             iGlobalSugarList = np.where(distance <= agent.vision)[0]
             nSugarPossibilities = len(iGlobalSugarList)
