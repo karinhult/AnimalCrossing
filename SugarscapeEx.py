@@ -111,7 +111,7 @@ maxSugar = 20
 roadWidth = 4
 roadValue = -2
 tunnelValue = -1
-runs = 10
+runs = 100
 hasRoad = True
 oneSide = True
 hasCrossings = True
@@ -129,7 +129,7 @@ if saveDataToFile:
     os.mkdir(dirName)
     print("Directory ", dirName, " Created ")
 
-for hasRoad, hasCrossings in zip([False, True, True], [False, False, True]):
+for hasRoad, hasCrossings in zip([True], [True]): #zip([False, True, True], [False, False, True])
     for run in range(runs):
         if animateSimulation:
             res = 500  # Animation resolution
@@ -218,7 +218,6 @@ for hasRoad, hasCrossings in zip([False, True, True], [False, False, True]):
             Tk.mainloop(canvas)
 
         A_list = np.array(A_list).T
-        # NOTE: Not finished and has NOT been tested yet!!
         if saveDataToFile:
             settings = [f"plantProb = {plantProb}", f"L = {L}", f"globalSugarMax = {globalSugarMax}", f"visionRange = {visionRange}",
                         f"metabolismRange = {metabolismRange}", f"sugarLevelRange = {sugarLevelRange}", f"growthRate = {growthRate}",
@@ -240,7 +239,6 @@ for hasRoad, hasCrossings in zip([False, True, True], [False, False, True]):
             outputFile.write(dataHeader)
             dataWriter = csv.writer(outputFile)
             dataWriter.writerow(A_list)
-            #put writing functions here
 
             outputFile.close()
             print("\nResult saved in ", fileName)
