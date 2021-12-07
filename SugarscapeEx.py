@@ -111,7 +111,7 @@ maxSugar = 20
 roadWidth = 4
 roadValue = -2
 tunnelValue = -1
-runs = 10
+runs = 1
 hasRoad = True
 oneSide = True
 hasCrossings = True
@@ -220,10 +220,9 @@ for hasRoad, hasCrossings in zip([False, True, True], [False, False, True]):
         A_list = np.array(A_list).T
         # NOTE: Not finished and has NOT been tested yet!!
         if saveDataToFile:
-            settings = [f"plantProb = {plantProb}", f"L = {L}", f"globalSugarMax = {globalSugarMax}", f"visionRange = {visionRange}",
-                        f"metabolismRange = {metabolismRange}", f"sugarLevelRange = {sugarLevelRange}", f"growthRate = {growthRate}",
-                        f"sproutRate = {sproutRate}", f"reproductionProbability = {reproductionProbability}", f"roadWidth = {roadWidth}",
-                        f"hasRoad = {hasRoad}", f"oneSide = {oneSide}", f"hasCrossings = {hasCrossings}"]
+            settings = [f"{plantProb = }", f"{L = }", f"{globalSugarMax = }", f"{visionRange = }", f"{metabolismRange = }", f"{sugarLevelRange = }",
+                        f"{growthRate = }", f"{sproutRate = }", f"{reproductionProbability = }", f"{roadWidth = }", f"{hasRoad = }", f"{oneSide = }",
+                        f"{hasCrossings = }", f"{bridgeIndices = }", f"{tunnelIndices = }"]
 
             dataHeader = "A_list: \n"
             fileName = dirName + '/'
