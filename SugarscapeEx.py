@@ -111,14 +111,14 @@ maxSugar = 20
 roadWidth = 4
 roadValue = -2
 tunnelValue = -1
-runs = 10
+runs = 20
 hasRoad = True
 oneSide = True
 hasCrossings = True
-bridgeIndices = np.array([L/4]).astype(int)
-tunnelIndices = np.array([3*L/4]).astype(int)
+bridgeIndices = np.array([L/2]).astype(int)
+tunnelIndices = np.array([]).astype(int)
 saveDataToFile = True
-animateSimulation = False
+animateSimulation = True
 
 if saveDataToFile:
     # Create target Directory
@@ -129,7 +129,7 @@ if saveDataToFile:
     os.mkdir(dirName)
     print("Directory ", dirName, " Created ")
 
-for hasRoad, hasCrossings in zip([False, True, True], [False, False, True]):
+for hasRoad, hasCrossings in zip([True], [True]): #zip([False, True, True], [False, False, True])
     for run in range(runs):
         if animateSimulation:
             res = 500  # Animation resolution
@@ -218,12 +218,10 @@ for hasRoad, hasCrossings in zip([False, True, True], [False, False, True]):
             Tk.mainloop(canvas)
 
         A_list = np.array(A_list).T
-        # NOTE: Not finished and has NOT been tested yet!!
         if saveDataToFile:
-            settings = [f"plantProb = {plantProb}", f"L = {L}", f"globalSugarMax = {globalSugarMax}", f"visionRange = {visionRange}",
-                        f"metabolismRange = {metabolismRange}", f"sugarLevelRange = {sugarLevelRange}", f"growthRate = {growthRate}",
-                        f"sproutRate = {sproutRate}", f"reproductionProbability = {reproductionProbability}", f"roadWidth = {roadWidth}",
-                        f"hasRoad = {hasRoad}", f"oneSide = {oneSide}", f"hasCrossings = {hasCrossings}"]
+            settings = [f"{plantProb = }", f"{L = }", f"{globalSugarMax = }", f"{visionRange = }", f"{metabolismRange = }", f"{sugarLevelRange = }",
+                        f"{growthRate = }", f"{sproutRate = }", f"{reproductionProbability = }", f"{roadWidth = }", f"{hasRoad = }", f"{oneSide = }",
+                        f"{hasCrossings = }", f"{bridgeIndices = }", f"{tunnelIndices = }"]
 
             dataHeader = "A_list: \n"
             fileName = dirName + '/'
@@ -240,7 +238,6 @@ for hasRoad, hasCrossings in zip([False, True, True], [False, False, True]):
             outputFile.write(dataHeader)
             dataWriter = csv.writer(outputFile)
             dataWriter.writerow(A_list)
-            #put writing functions here
 
             outputFile.close()
             print("\nResult saved in ", fileName)
