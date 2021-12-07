@@ -30,15 +30,19 @@ def getMeanAndVariances(A, runs):
     meanVarA = getMeanVarianceSteadyState(A, runs)
     return meanA, varMeanA, meanVarA
 
-def plotRandomA(A, runs, saveRandom, plotfilename, title):
+def plotRandomA(A, runs, saveRandom, plotfilename, title, delay):
     iBlue = np.random.randint(0,runs)
     fig, ax = plt.subplots(1, 1, figsize=(5, 4))
     for i in range(runs):
         ax.plot(range(0,2001), A[i,:], color = 'silver')
     ax.plot(range(0, 2001), A[iBlue, :], color='blue')
+    if delay < 2001:
+        ax.plot([delay, delay], [-100, 300], color='black', linestyle = 'dashed', label='Mean delay')
+        ax.legend(loc='upper right')
     ax.set_xlabel('Time')
-    ax.set_ylabel('Number of agents $A$')
+    ax.set_ylabel('Number of agents')
     ax.set_title(title)
+    ax.set_ylim([0,170])
     if saveRandom:
         fig.savefig(plotfilename + '.pdf')
     else:
@@ -47,14 +51,14 @@ def plotRandomA(A, runs, saveRandom, plotfilename, title):
 def getSteadyStateDelay(A, runs):
     meanSteadyStateA = getNoRoadData()[0]
     meanDelay = 0
-    intervall = 100
+    intervall = 200
     fraction = 0.9
     for j in range(runs):
         steadyStateDelay = np.inf
         for i in range(2001-intervall+1):
             meanA = np.mean(A[j,i:i+intervall])
             if meanA > fraction*meanSteadyStateA:
-                steadyStateDelay = i
+                steadyStateDelay = i+intervall/2
                 break
         meanDelay += steadyStateDelay/runs
     return meanDelay
@@ -64,19 +68,19 @@ def getNoRoadData(runs = 20, plotRandom = False, saveRandom = False, plotfilenam
     initialFileName = directoryName + 'noRoad_'
     A = getData(runs, initialFileName)
     meanA, varMeanA, meanVarA = getMeanAndVariances(A, runs)
-    if plotRandom:
-        plotRandomA(A, runs, saveRandom, plotfilename, title)
     meanDelay = 0
-    intervall = 100
+    intervall = 200
     fraction = 0.9
     for j in range(runs):
         steadyStateDelay = np.inf
         for i in range(2001 - intervall + 1):
             meanA_intervall = np.mean(A[j, i:i + intervall])
             if meanA_intervall > fraction * meanA:
-                steadyStateDelay = i
+                steadyStateDelay = i+intervall/2
                 break
         meanDelay += steadyStateDelay / runs
+    if plotRandom:
+        plotRandomA(A, runs, saveRandom, plotfilename, title, meanDelay)
     return meanA, varMeanA, meanVarA, meanDelay
 
 def getRoadData(runs = 20, plotRandom = False, saveRandom = False, plotfilename = '', title = ''):
@@ -84,20 +88,22 @@ def getRoadData(runs = 20, plotRandom = False, saveRandom = False, plotfilename 
     initialFileName = directoryName + 'road_'
     A = getData(runs, initialFileName)
     meanA, varMeanA, meanVarA = getMeanAndVariances(A, runs)
-    if plotRandom:
-        plotRandomA(A, runs, saveRandom, plotfilename, title)
     meanDelay = getSteadyStateDelay(A, runs)
+    if plotRandom:
+        plotRandomA(A, runs, saveRandom, plotfilename, title, meanDelay)
     return meanA, varMeanA, meanVarA, meanDelay
 
 def getAnimalCrossingAnalysis(directoryName, runs = 20, plotRandom = False, saveRandom = False, plotfilename = '', title = ''):
     initialFileName = 'Results/' + directoryName + '/roadAndCrossings_'
     A = getData(runs, initialFileName)
     meanA, varMeanA, meanVarA = getMeanAndVariances(A, runs)
-    if plotRandom:
-        plotRandomA(A, runs, saveRandom, plotfilename, title)
     meanDelay = getSteadyStateDelay(A, runs)
+    if plotRandom:
+        plotRandomA(A, runs, saveRandom, plotfilename, title, meanDelay)
     return meanA, varMeanA, meanVarA, meanDelay
 
+plt.rcParams["font.family"] = "Times New Roman"
+plt.rcParams["font.size"] = 12
 # TODO
 # - Get directory
 # - For loop that reads data from file and gets mean values of stuff, etc
