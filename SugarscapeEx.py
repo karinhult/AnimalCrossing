@@ -111,14 +111,14 @@ maxSugar = 20
 roadWidth = 4
 roadValue = -2
 tunnelValue = -1
-runs = 100
+runs = 20
 hasRoad = True
 oneSide = True
 hasCrossings = True
-bridgeIndices = np.array([L/4]).astype(int)
-tunnelIndices = np.array([3*L/4]).astype(int)
+bridgeIndices = np.array([L/2]).astype(int)
+tunnelIndices = np.array([]).astype(int)
 saveDataToFile = True
-animateSimulation = False
+animateSimulation = True
 
 if saveDataToFile:
     # Create target Directory
