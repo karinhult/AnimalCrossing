@@ -115,10 +115,12 @@ runs = 20
 hasRoad = True
 oneSide = True
 hasCrossings = True
-bridgeIndices = np.array([L/2]).astype(int)
+n = 1
+bridgeIndices = np.append(np.arange(L/4-n/2+1, L/4+n/2+1), np.arange(3*L/4-n/2+1, 3*L/4+n/2+1)).astype(int)
 tunnelIndices = np.array([]).astype(int)
 saveDataToFile = True
-animateSimulation = True
+animateSimulation = False
+crossingsText = 'roadAnd2x1WideBridges'
 
 if saveDataToFile:
     # Create target Directory
@@ -226,7 +228,7 @@ for hasRoad, hasCrossings in zip([True], [True]): #zip([False, True, True], [Fal
             dataHeader = "A_list: \n"
             fileName = dirName + '/'
             if hasRoad and hasCrossings:
-                fileName += 'roadAndCrossings'
+                fileName += crossingsText
             elif hasRoad:
                 fileName += 'road'
             else:
