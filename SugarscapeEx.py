@@ -219,10 +219,9 @@ for hasRoad, hasCrossings in zip([True], [True]): #zip([False, True, True], [Fal
 
         A_list = np.array(A_list).T
         if saveDataToFile:
-            settings = [f"plantProb = {plantProb}", f"L = {L}", f"globalSugarMax = {globalSugarMax}", f"visionRange = {visionRange}",
-                        f"metabolismRange = {metabolismRange}", f"sugarLevelRange = {sugarLevelRange}", f"growthRate = {growthRate}",
-                        f"sproutRate = {sproutRate}", f"reproductionProbability = {reproductionProbability}", f"roadWidth = {roadWidth}",
-                        f"hasRoad = {hasRoad}", f"oneSide = {oneSide}", f"hasCrossings = {hasCrossings}"]
+            settings = [f"{plantProb = }", f"{L = }", f"{globalSugarMax = }", f"{visionRange = }", f"{metabolismRange = }", f"{sugarLevelRange = }",
+                        f"{growthRate = }", f"{sproutRate = }", f"{reproductionProbability = }", f"{roadWidth = }", f"{hasRoad = }", f"{oneSide = }",
+                        f"{hasCrossings = }", f"{bridgeIndices = }", f"{tunnelIndices = }"]
 
             dataHeader = "A_list: \n"
             fileName = dirName + '/'
