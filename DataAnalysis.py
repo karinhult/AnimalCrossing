@@ -2,11 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import csv
 
-def getData(runs, initialFileName):
+def getData(runs, initialFileName, skip=16):
     A = np.zeros((runs, 2001))
     for i in range(runs):
         filename = initialFileName + 'run' + str(int(i + 1))
-        A[i, :] = np.genfromtxt(filename + '.csv', delimiter=',', skip_header=16)
+        A[i, :] = np.genfromtxt(filename + '.csv', delimiter=',', skip_header=skip)
     return A
 
 def getSteadyStateMean(A):
@@ -93,9 +93,9 @@ def getRoadData(runs = 20, plotRandom = False, saveRandom = False, plotfilename 
         plotRandomA(A, runs, saveRandom, plotfilename, title, meanDelay)
     return meanA, varMeanA, meanVarA, meanDelay
 
-def getAnimalCrossingAnalysis(directoryName, runs = 20, plotRandom = False, saveRandom = False, plotfilename = '', title = ''):
+def getAnimalCrossingAnalysis(directoryName, runs = 20, plotRandom = False, saveRandom = False, plotfilename = '', title = '', skip=16):
     initialFileName = 'Results/' + directoryName + '/roadAndCrossings_'
-    A = getData(runs, initialFileName)
+    A = getData(runs, initialFileName, skip=skip)
     meanA, varMeanA, meanVarA = getMeanAndVariances(A, runs)
     meanDelay = getSteadyStateDelay(A, runs)
     if plotRandom:
@@ -170,4 +170,4 @@ print(str(getRoadData(plotRandom = True, title='With road, without crossings', s
 #print(str(getAnimalCrossingAnalysis('2x5wideBridges', plotRandom = True, title='With road and two 5 times wide bridges', saveRandom=True, plotfilename='Results/WithRoadAnd2x5wideBridge')))
 
 print('\n 2x10 Bridges:')
-print(str(getAnimalCrossingAnalysis('2x10wideBridges', plotRandom = True, title='With road and two 10 times wide bridges', saveRandom=True, plotfilename='Results/WithRoadAnd2x10wideBridge')))
+print(str(getAnimalCrossingAnalysis('2x10wideBridges', plotRandom = True, title='With road and two 10 times wide bridges', saveRandom=True, plotfilename='Results/WithRoadAnd2x10wideBridge', skip=17)))
