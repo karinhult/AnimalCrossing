@@ -18,17 +18,17 @@ def getVarianceSteadyStateMean(A, runs):
         A_mean[i] = np.mean(A[i, 1001:])
     return np.var(A_mean)
 
-def getMeanVarianceSteadyState(A, runs):
+def getMeanStandardDeviationSteadyState(A, runs):
     A_var = np.zeros(runs)
     for i in range(runs):
         A_var[i] = np.var(A[i,1001:])
-    return np.mean(A_var)
+    return np.mean(np.sqrt(A_var))
 
-def getMeanAndVariances(A, runs):
+def getMeanAndStandardDeviations(A, runs):
     meanA = getSteadyStateMean(A)
-    varMeanA = getVarianceSteadyStateMean(A, runs)
-    meanVarA = getMeanVarianceSteadyState(A, runs)
-    return meanA, varMeanA, meanVarA
+    stdMeanA = np.sqrt(getVarianceSteadyStateMean(A, runs))
+    meanStdA = getMeanStandardDeviationSteadyState(A, runs)
+    return meanA, stdMeanA, meanStdA
 
 def plotRandomA(A, runs, saveRandom, plotfilename, title, delay):
     iBlue = np.random.randint(0,runs)
@@ -50,7 +50,7 @@ def plotRandomA(A, runs, saveRandom, plotfilename, title, delay):
 
 def getSteadyStateDelay(A, runs):
     meanSteadyStateA = getNoRoadData()[0]
-    meanDelay = 0
+    delay = np.zeros(runs)
     intervall = 200
     fraction = 0.9
     for j in range(runs):
@@ -60,15 +60,19 @@ def getSteadyStateDelay(A, runs):
             if meanA > fraction*meanSteadyStateA:
                 steadyStateDelay = i+intervall/2
                 break
-        meanDelay += steadyStateDelay/runs
-    return meanDelay
+        delay[j] = steadyStateDelay
+    if (delay == np.inf).any():
+        return np.inf, np.nan
+    meanDelay = np.mean(delay)
+    stdDelay = np.sqrt(np.var(delay))
+    return meanDelay, stdDelay
 
 def getNoRoadData(runs = 20, plotRandom = False, saveRandom = False, plotfilename = '', title = ''):
     directoryName = 'Results/' + '2021-12-07_16.16.37/'
     initialFileName = directoryName + 'noRoad_'
     A = getData(runs, initialFileName)
-    meanA, varMeanA, meanVarA = getMeanAndVariances(A, runs)
-    meanDelay = 0
+    meanA, stdMeanA, meanStdA = getMeanAndStandardDeviations(A, runs)
+    delay = np.zeros(runs)
     intervall = 200
     fraction = 0.9
     for j in range(runs):
@@ -78,29 +82,31 @@ def getNoRoadData(runs = 20, plotRandom = False, saveRandom = False, plotfilenam
             if meanA_intervall > fraction * meanA:
                 steadyStateDelay = i+intervall/2
                 break
-        meanDelay += steadyStateDelay / runs
+        delay[j] = steadyStateDelay
+    meanDelay = np.mean(delay)
+    stdDelay = np.sqrt(np.var(delay))
     if plotRandom:
         plotRandomA(A, runs, saveRandom, plotfilename, title, meanDelay)
-    return meanA, varMeanA, meanVarA, meanDelay
+    return meanA, stdMeanA, meanStdA, meanDelay, stdDelay
 
 def getRoadData(runs = 20, plotRandom = False, saveRandom = False, plotfilename = '', title = ''):
     directoryName = 'Results/' + '2021-12-07_16.16.37/'
     initialFileName = directoryName + 'road_'
     A = getData(runs, initialFileName)
-    meanA, varMeanA, meanVarA = getMeanAndVariances(A, runs)
-    meanDelay = getSteadyStateDelay(A, runs)
+    meanA, stdMeanA, meanStdA = getMeanAndStandardDeviations(A, runs)
+    meanDelay, stdDelay = getSteadyStateDelay(A, runs)
     if plotRandom:
         plotRandomA(A, runs, saveRandom, plotfilename, title, meanDelay)
-    return meanA, varMeanA, meanVarA, meanDelay
+    return meanA, stdMeanA, meanStdA, meanDelay, stdDelay
 
 def getAnimalCrossingAnalysis(directoryName, runs = 20, plotRandom = False, saveRandom = False, plotfilename = '', title = '', skip=16):
     initialFileName = 'Results/' + directoryName + '/roadAndCrossings_'
     A = getData(runs, initialFileName, skip=skip)
-    meanA, varMeanA, meanVarA = getMeanAndVariances(A, runs)
-    meanDelay = getSteadyStateDelay(A, runs)
+    meanA, stdMeanA, meanStdA = getMeanAndStandardDeviations(A, runs)
+    meanDelay, stdDelay = getSteadyStateDelay(A, runs)
     if plotRandom:
         plotRandomA(A, runs, saveRandom, plotfilename, title, meanDelay)
-    return meanA, varMeanA, meanVarA, meanDelay
+    return meanA, stdMeanA, meanStdA, meanDelay, stdDelay
 
 plt.rcParams["font.family"] = "Times New Roman"
 plt.rcParams["font.size"] = 12
