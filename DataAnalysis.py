@@ -2,11 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import csv
 
-def getData(runs, initialFileName):
+def getData(runs, initialFileName, skip=16):
     A = np.zeros((runs, 2001))
     for i in range(runs):
         filename = initialFileName + 'run' + str(int(i + 1))
-        A[i, :] = np.genfromtxt(filename + '.csv', delimiter=',', skip_header=16)
+        A[i, :] = np.genfromtxt(filename + '.csv', delimiter=',', skip_header=skip)
     return A
 
 def getSteadyStateMean(A):
@@ -99,9 +99,9 @@ def getRoadData(runs = 20, plotRandom = False, saveRandom = False, plotfilename 
         plotRandomA(A, runs, saveRandom, plotfilename, title, meanDelay)
     return meanA, stdMeanA, meanStdA, meanDelay, stdDelay
 
-def getAnimalCrossingAnalysis(directoryName, runs = 20, plotRandom = False, saveRandom = False, plotfilename = '', title = ''):
+def getAnimalCrossingAnalysis(directoryName, runs = 20, plotRandom = False, saveRandom = False, plotfilename = '', title = '', skip=16):
     initialFileName = 'Results/' + directoryName + '/roadAndCrossings_'
-    A = getData(runs, initialFileName)
+    A = getData(runs, initialFileName, skip=skip)
     meanA, stdMeanA, meanStdA = getMeanAndStandardDeviations(A, runs)
     meanDelay, stdDelay = getSteadyStateDelay(A, runs)
     if plotRandom:
@@ -118,32 +118,62 @@ plt.rcParams["font.size"] = 12
 print(str(getNoRoadData(plotRandom = True, title='Without road', saveRandom=True, plotfilename='Results/WithoutRoad')))
 print(str(getRoadData(plotRandom = True, title='With road, without crossings', saveRandom=True, plotfilename='Results/WithRoad')))
 
-print('\n One tunnel:')
-print(str(getAnimalCrossingAnalysis('2021-12-07_16.45.11', plotRandom = True, title='With road and one tunnel', saveRandom=True, plotfilename='Results/WithRoadAnd01Tunnels')))
+#print('\n One tunnel:')
+#print(str(getAnimalCrossingAnalysis('2021-12-07_16.45.11', plotRandom = True, title='With road and one tunnel', saveRandom=True, plotfilename='Results/WithRoadAnd01Tunnels')))
 
-print('\n Two tunnels:')
-print(str(getAnimalCrossingAnalysis('2021-12-07_16.45.29', plotRandom = True, title='With road and two tunnels', saveRandom=True, plotfilename='Results/WithRoadAnd02Tunnels')))
+#print('\n Two tunnels:')
+#print(str(getAnimalCrossingAnalysis('2021-12-07_16.45.29', plotRandom = True, title='With road and two tunnels', saveRandom=True, plotfilename='Results/WithRoadAnd02Tunnels')))
 
-print('\n Three tunnels:')
-print(str(getAnimalCrossingAnalysis('2021-12-07_16.45.56', plotRandom = True, title='With road and three tunnels', saveRandom=True, plotfilename='Results/WithRoadAnd03Tunnels')))
+#print('\n Three tunnels:')
+#print(str(getAnimalCrossingAnalysis('2021-12-07_16.45.56', plotRandom = True, title='With road and three tunnels', saveRandom=True, plotfilename='Results/WithRoadAnd03Tunnels')))
 
-print('\n Five tunnels:')
-print(str(getAnimalCrossingAnalysis('2021-12-07_16.46.21', plotRandom = True, title='With road and five tunnels', saveRandom=True, plotfilename='Results/WithRoadAnd05Tunnels')))
+#print('\n Five tunnels:')
+#print(str(getAnimalCrossingAnalysis('2021-12-07_16.46.21', plotRandom = True, title='With road and five tunnels', saveRandom=True, plotfilename='Results/WithRoadAnd05Tunnels')))
 
-print('\n Ten tunnels:')
-print(str(getAnimalCrossingAnalysis('2021-12-07_16.46.47', plotRandom = True, title='With road and ten tunnels', saveRandom=True, plotfilename='Results/WithRoadAnd10Tunnels')))
+#print('\n Ten tunnels:')
+#print(str(getAnimalCrossingAnalysis('2021-12-07_16.46.47', plotRandom = True, title='With road and ten tunnels', saveRandom=True, plotfilename='Results/WithRoadAnd10Tunnels')))
 
-print('\n One bridge:')
-print(str(getAnimalCrossingAnalysis('2021-12-07_17.23.15', plotRandom = True, title='With road and one bridge', saveRandom=True, plotfilename='Results/WithRoadAnd01Bridges')))
+#print('\n One bridge:')
+#print(str(getAnimalCrossingAnalysis('2021-12-07_17.23.15', plotRandom = True, title='With road and one bridge', saveRandom=True, plotfilename='Results/WithRoadAnd01Bridges')))
 
-print('\n Two bridges:')
-print(str(getAnimalCrossingAnalysis('2021-12-07_17.23.27', plotRandom = True, title='With road and two bridges', saveRandom=True, plotfilename='Results/WithRoadAnd02Bridges')))
+#print('\n Two bridges:')
+#print(str(getAnimalCrossingAnalysis('2021-12-07_17.23.27', plotRandom = True, title='With road and two bridges', saveRandom=True, plotfilename='Results/WithRoadAnd02Bridges')))
 
-print('\n Three bridges:')
-print(str(getAnimalCrossingAnalysis('2021-12-07_17.23.42', plotRandom = True, title='With road and three bridges', saveRandom=True, plotfilename='Results/WithRoadAnd03Bridges')))
+#print('\n Three bridges:')
+#print(str(getAnimalCrossingAnalysis('2021-12-07_17.23.42', plotRandom = True, title='With road and three bridges', saveRandom=True, plotfilename='Results/WithRoadAnd03Bridges')))
 
-print('\n Five bridges:')
-print(str(getAnimalCrossingAnalysis('2021-12-07_17.24.05', plotRandom = True, title='With road and five bridges', saveRandom=True, plotfilename='Results/WithRoadAnd05Bridges')))
+#print('\n Five bridges:')
+#print(str(getAnimalCrossingAnalysis('2021-12-07_17.24.05', plotRandom = True, title='With road and five bridges', saveRandom=True, plotfilename='Results/WithRoadAnd05Bridges')))
 
-print('\n Ten bridges:')
-print(str(getAnimalCrossingAnalysis('2021-12-07_17.24.24', plotRandom = True, title='With road and ten bridges', saveRandom=True, plotfilename='Results/WithRoadAnd10Bridges')))
+#print('\n Ten bridges:')
+#print(str(getAnimalCrossingAnalysis('2021-12-07_17.24.24', plotRandom = True, title='With road and ten bridges', saveRandom=True, plotfilename='Results/WithRoadAnd10Bridges')))
+
+#print('\n 1x1 Bridge:')
+#print(str(getAnimalCrossingAnalysis('1x1wideBridge', plotRandom = True, title='With road and one 1 times wide bridge', saveRandom=True, plotfilename='Results/WithRoadAnd1x1wideBridge')))
+
+#print('\n 1x2 Bridge:')
+#print(str(getAnimalCrossingAnalysis('1x2wideBridge', plotRandom = True, title='With road and one 2 times wide bridge', saveRandom=True, plotfilename='Results/WithRoadAnd1x2wideBridge')))
+
+#print('\n 1x3 Bridge:')
+#print(str(getAnimalCrossingAnalysis('1x3wideBridge', plotRandom = True, title='With road and one 3 times wide bridge', saveRandom=True, plotfilename='Results/WithRoadAnd1x4wideBridge')))
+
+#print('\n 1x5 Bridge:')
+#print(str(getAnimalCrossingAnalysis('1x5wideBridge', plotRandom = True, title='With road and one 5 times wide bridge', saveRandom=True, plotfilename='Results/WithRoadAnd1x5wideBridge')))
+
+#print('\n 1x10 Bridge:')
+#print(str(getAnimalCrossingAnalysis('1x10wideBridge', plotRandom = True, title='With road and one 10 times wide bridge', saveRandom=True, plotfilename='Results/WithRoadAnd1x10wideBridge')))
+
+#print('\n 2x1 Bridges:')
+#print(str(getAnimalCrossingAnalysis('2x1wideBridges', plotRandom = True, title='With road and two 1 times wide bridges', saveRandom=True, plotfilename='Results/WithRoadAnd2x1wideBridge')))
+
+#print('\n 2x2 Bridges:')
+#print(str(getAnimalCrossingAnalysis('2x2wideBridges', plotRandom = True, title='With road and two 2 times wide bridges', saveRandom=True, plotfilename='Results/WithRoadAnd2x2wideBridge')))
+
+#print('\n 2x3 Bridges:')
+#print(str(getAnimalCrossingAnalysis('2x3wideBridges', plotRandom = True, title='With road and two 3 times wide bridges', saveRandom=True, plotfilename='Results/WithRoadAnd2x3wideBridge')))
+
+#print('\n 2x5 Bridges:')
+#print(str(getAnimalCrossingAnalysis('2x5wideBridges', plotRandom = True, title='With road and two 5 times wide bridges', saveRandom=True, plotfilename='Results/WithRoadAnd2x5wideBridge')))
+
+print('\n 2x10 Bridges:')
+print(str(getAnimalCrossingAnalysis('2x10wideBridges', plotRandom = True, title='With road and two 10 times wide bridges', saveRandom=True, plotfilename='Results/WithRoadAnd2x10wideBridge', skip=17)))
