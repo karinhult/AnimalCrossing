@@ -115,10 +115,10 @@ runs = 20
 hasRoad = True
 oneSide = True
 hasCrossings = True
-bridgeIndices = np.array([L/6, 2*L/6, 3*L/6, 4*L/6, 5*L/6]).astype(int) # np.array([L/2]).astype(int), np.array([L/3, 2*L/3]).astype(int), np.array([L/4, 2*L/4, 3*L/4]).astype(int), np.array([L/6, 2*L/6, 3*L/6, 4*L/6, 5*L/6]).astype(int), np.array([L/11, 2*L/11, 3*L/11, 4*L/11, 5*L/11, 6*L/11, 7*L/11, 8*L/11, 9*L/11, 10*L/11]).astype(int)
+bridgeIndices = np.array([L/11, 2*L/11, 3*L/11, 4*L/11, 5*L/11, 6*L/11, 7*L/11, 8*L/11, 9*L/11, 10*L/11]).astype(int) # np.array([L/2]).astype(int), np.array([L/3, 2*L/3]).astype(int), np.array([L/4, 2*L/4, 3*L/4]).astype(int), np.array([L/6, 2*L/6, 3*L/6, 4*L/6, 5*L/6]).astype(int), np.array([L/11, 2*L/11, 3*L/11, 4*L/11, 5*L/11, 6*L/11, 7*L/11, 8*L/11, 9*L/11, 10*L/11]).astype(int)
 tunnelIndices = np.array([]).astype(int)
-saveDataToFile = True
-animateSimulation = False
+saveDataToFile = False
+animateSimulation = True
 
 if saveDataToFile:
     # Create target Directory
