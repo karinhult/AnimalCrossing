@@ -13,15 +13,11 @@ def getSteadyStateMean(A):
     return np.mean(A)
 
 def getVarianceSteadyStateMean(A, runs):
-    A_mean = np.zeros(runs)
-    for i in range(runs):
-        A_mean[i] = np.mean(A[i, 1001:])
+    A_mean = np.mean(A[:,1001:], axis=1)
     return np.var(A_mean)
 
 def getMeanStandardDeviationSteadyState(A, runs):
-    A_var = np.zeros(runs)
-    for i in range(runs):
-        A_var[i] = np.var(A[i,1001:])
+    A_var = np.var(A[:,1001:], axis=1)
     return np.mean(np.sqrt(A_var))
 
 def getMeanAndStandardDeviations(A, runs):
@@ -34,8 +30,9 @@ def plotRandomA(A, runs, saveRandom, plotfilename, title, delay):
     iBlue = np.random.randint(0,runs)
     fig, ax = plt.subplots(1, 1, figsize=(5, 4))
     for i in range(runs):
-        ax.plot(range(0,2001), A[i,:], color = 'silver')
-    ax.plot(range(0, 2001), A[iBlue, :], color='blue')
+        ax.plot(A[i,:], color = 'silver')
+    ax.plot(A[iBlue, :], color='blue')
+    ax.plot(np.mean(A, axis=0), color='red')
     if delay < 2001:
         ax.plot([delay, delay], [-100, 300], color='black', linestyle = 'dashed', label='Mean delay')
         ax.legend(loc='upper right')
@@ -180,32 +177,32 @@ plt.rcParams["font.size"] = 12
 
 
 
-print('\n One tunnel 2 wide:')
-print(str(getAnimalCrossingAnalysis('1tunnel2wide', plotRandom = True, title='With road and one tunnel', saveRandom=True, plotfilename='Results/WithRoadAnd01Tunnels2wide')))
+# print('\n One tunnel 2 wide:')
+# print(str(getAnimalCrossingAnalysis('1tunnel2wide', plotRandom = True, title='With road and one tunnel', saveRandom=True, plotfilename='Results/WithRoadAnd01Tunnels2wide')))
 
-print('\n Two tunnels 2 wide:')
-print(str(getAnimalCrossingAnalysis('2tunnel2wide', plotRandom = True, title='With road and two tunnels', saveRandom=True, plotfilename='Results/WithRoadAnd02Tunnels2wide')))
+# print('\n Two tunnels 2 wide:')
+# print(str(getAnimalCrossingAnalysis('2tunnel2wide', plotRandom = True, title='With road and two tunnels', saveRandom=True, plotfilename='Results/WithRoadAnd02Tunnels2wide')))
 
-print('\n Three tunnels 2 wide:')
-print(str(getAnimalCrossingAnalysis('3tunnel2wide', plotRandom = True, title='With road and three tunnels', saveRandom=True, plotfilename='Results/WithRoadAnd03Tunnels2wide')))
+# print('\n Three tunnels 2 wide:')
+# print(str(getAnimalCrossingAnalysis('3tunnel2wide', plotRandom = True, title='With road and three tunnels', saveRandom=True, plotfilename='Results/WithRoadAnd03Tunnels2wide')))
 
-print('\n Five tunnels 2 wide:')
-print(str(getAnimalCrossingAnalysis('5tunnel2wide', plotRandom = True, title='With road and five tunnels', saveRandom=True, plotfilename='Results/WithRoadAnd05Tunnels2wide')))
+# print('\n Five tunnels 2 wide:')
+# print(str(getAnimalCrossingAnalysis('5tunnel2wide', plotRandom = True, title='With road and five tunnels', saveRandom=True, plotfilename='Results/WithRoadAnd05Tunnels2wide')))
 
-print('\n Ten tunnels 2 wide:')
-print(str(getAnimalCrossingAnalysis('10tunnel2wide', skip=17, plotRandom = True, title='With road and ten tunnels', saveRandom=True, plotfilename='Results/WithRoadAnd10Tunnels2wide')))
+# print('\n Ten tunnels 2 wide:')
+# print(str(getAnimalCrossingAnalysis('10tunnel2wide', skip=17, plotRandom = True, title='With road and ten tunnels', saveRandom=True, plotfilename='Results/WithRoadAnd10Tunnels2wide')))
 
 print('\n One bridge 2 wide:')
 print(str(getAnimalCrossingAnalysis('1bridge2wide', plotRandom = True, title='With road and one bridge', saveRandom=True, plotfilename='Results/WithRoadAnd01Bridges2wide')))
 
-print('\n Two bridges 2 wide:')
-print(str(getAnimalCrossingAnalysis('2bridge2wide', plotRandom = True, title='With road and two bridges', saveRandom=True, plotfilename='Results/WithRoadAnd02Bridges2wide')))
+# print('\n Two bridges 2 wide:')
+# print(str(getAnimalCrossingAnalysis('2bridge2wide', plotRandom = True, title='With road and two bridges', saveRandom=True, plotfilename='Results/WithRoadAnd02Bridges2wide')))
 
-print('\n Three bridges 2 wide:')
-print(str(getAnimalCrossingAnalysis('3bridge2wide', plotRandom = True, title='With road and three bridges', saveRandom=True, plotfilename='Results/WithRoadAnd03Bridges2wide')))
+# print('\n Three bridges 2 wide:')
+# print(str(getAnimalCrossingAnalysis('3bridge2wide', plotRandom = True, title='With road and three bridges', saveRandom=True, plotfilename='Results/WithRoadAnd03Bridges2wide')))
 
-print('\n Five bridges 2 wide:')
-print(str(getAnimalCrossingAnalysis('5bridge2wide', plotRandom = True, title='With road and five bridges', saveRandom=True, plotfilename='Results/WithRoadAnd05Bridges2wide')))
+# print('\n Five bridges 2 wide:')
+# print(str(getAnimalCrossingAnalysis('5bridge2wide', plotRandom = True, title='With road and five bridges', saveRandom=True, plotfilename='Results/WithRoadAnd05Bridges2wide')))
 
-print('\n Ten bridges 2 wide:')
-print(str(getAnimalCrossingAnalysis('10bridge2wide', skip=17, plotRandom = True, title='With road and ten bridges', saveRandom=True, plotfilename='Results/WithRoadAnd10Bridges2wide')))
+# print('\n Ten bridges 2 wide:')
+# print(str(getAnimalCrossingAnalysis('10bridge2wide', skip=17, plotRandom = True, title='With road and ten bridges', saveRandom=True, plotfilename='Results/WithRoadAnd10Bridges2wide')))
