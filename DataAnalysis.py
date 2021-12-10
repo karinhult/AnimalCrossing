@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import csv
+import sys
+from scipy.signal import savgol_filter
 
 def getData(runs, initialFileName, skip=16):
     A = np.zeros((runs, 2001))
@@ -33,6 +35,7 @@ def plotRandomA(A, runs, saveRandom, plotfilename, title, delay):
         ax.plot(A[i,:], color = 'silver')
     ax.plot(A[iBlue, :], color='blue')
     ax.plot(np.mean(A, axis=0), color='red')
+    # ax.plot(savgol_filter(np.mean(A, axis=0), 201, 3), color='green')
     if delay < 2001:
         ax.plot([delay, delay], [-100, 300], color='black', linestyle = 'dashed', label='Mean delay')
         ax.legend(loc='upper right')
@@ -46,7 +49,7 @@ def plotRandomA(A, runs, saveRandom, plotfilename, title, delay):
         plt.show()
 
 def getSteadyStateDelay(A, runs):
-    varMax = 2
+    varMax = .5
     interval = 200
 
     meanRun = np.mean(A, axis=0)
@@ -55,6 +58,24 @@ def getSteadyStateDelay(A, runs):
             return i
 
     return np.nan # Only occurs if no value is found
+
+def getInflectionPoint(A, runs):
+    derivativeTolerance = 1e-4
+    windowMeanTolerance = 3
+    subsequentMeanTolerance = 5
+    meanRun = np.mean(A, axis=0)
+    peakIndex = np.argmax(meanRun)
+    smoothedMeanRun = savgol_filter(meanRun, 201, 3)
+    windowMeanSize = 100
+    windowMean = np.full(len(smoothedMeanRun), np.inf)
+    windowMean[:-windowMeanSize+1] = np.mean(np.lib.stride_tricks.sliding_window_view(smoothedMeanRun, windowMeanSize), axis=1)
+    subsequentMean = (np.cumsum(smoothedMeanRun[::-1]) / np.arange(1, len(smoothedMeanRun)+1))[::-1]
+    secondOrderDer = np.gradient(np.gradient(smoothedMeanRun))
+    inflectionPoints = np.where((np.abs(secondOrderDer) < derivativeTolerance) & (np.abs(smoothedMeanRun - windowMean) < windowMeanTolerance) & \
+        (np.abs(smoothedMeanRun - subsequentMean) < subsequentMeanTolerance))[0]
+    inflectionPoints = inflectionPoints[inflectionPoints > peakIndex + 100]
+
+    return inflectionPoints[0]
 
 def getNoRoadData(runs = 20, plotRandom = False, saveRandom = False, plotfilename = '', title = ''):
     directoryName = 'Results/' + 'noRoadAndNoBridge/'
@@ -89,18 +110,26 @@ def getRoadData(runs = 20, plotRandom = False, saveRandom = False, plotfilename 
         plotRandomA(A, runs, saveRandom, plotfilename, title, delay)
     return meanA, stdMeanA, meanStdA, delay
 
-def getAnimalCrossingAnalysis(directoryName, runs = 20, plotRandom = False, saveRandom = False, plotfilename = '', title = '', skip=16):
-    initialFileName = 'Results/' + directoryName + '/roadAndCrossings_'
+def getAnimalCrossingAnalysis(directoryName, runs = 20, plotRandom = False, saveRandom = False, plotfilename = '', title = '', skip=16, topDirectory='Results'):
+    initialFileName = f'{topDirectory}/{directoryName}/roadAndCrossings_'
     A = getData(runs, initialFileName, skip=skip)
     meanA, stdMeanA, meanStdA = getMeanAndStandardDeviations(A, runs)
     # meanDelay, stdDelay = getSteadyStateDelay(A, runs)
-    delay = getSteadyStateDelay(A, runs)
+    # delay = getSteadyStateDelay(A, runs)
+    delay = getInflectionPoint(A, runs)
     if plotRandom:
         plotRandomA(A, runs, saveRandom, plotfilename, title, delay)
     return meanA, stdMeanA, meanStdA, delay
 
 plt.rcParams["font.family"] = "Times New Roman"
 plt.rcParams["font.size"] = 12
+
+if len(sys.argv) >= 2:
+    print(f'\n{sys.argv[2]}:')
+    print(str(getAnimalCrossingAnalysis(sys.argv[1], runs = 100, plotRandom = True, title=sys.argv[2], saveRandom=True, plotfilename=f'100runResults/{sys.argv[1]}', skip=int(sys.argv[3]), topDirectory='100runResults')))
+
+# print(str(getAnimalCrossingAnalysis('1x2widetunnels', plotRandom = True, title='Temp', saveRandom=True, plotfilename='100runResults/1x2widetunnels', topDirectory='100runResults')))
+
 # TODO
 # - Get directory
 # - For loop that reads data from file and gets mean values of stuff, etc
@@ -110,7 +139,7 @@ plt.rcParams["font.size"] = 12
 #print(str(getRoadData(plotRandom = True, title='With road, without crossings', saveRandom=True, plotfilename='Results/WithRoad')))
 
 #print('\n One tunnel:')
-#print(str(getAnimalCrossingAnalysis('1tunnel', plotRandom = True, title='With road and one tunnel', saveRandom=True, plotfilename='Results/WithRoadAnd01Tunnels')))
+# print(str(getAnimalCrossingAnalysis('1tunnel', plotRandom = True, title='With road and one tunnel', saveRandom=True, plotfilename='Results/WithRoadAnd01Tunnels')))
 
 #print('\n Two tunnels:')
 #print(str(getAnimalCrossingAnalysis('2tunnel', plotRandom = True, title='With road and two tunnels', saveRandom=True, plotfilename='Results/WithRoadAnd02Tunnels')))
@@ -186,8 +215,8 @@ plt.rcParams["font.size"] = 12
 # print('\n Ten tunnels 2 wide:')
 # print(str(getAnimalCrossingAnalysis('10tunnel2wide', skip=17, plotRandom = True, title='With road and ten tunnels', saveRandom=True, plotfilename='Results/WithRoadAnd10Tunnels2wide')))
 
-print('\n One bridge 2 wide:')
-print(str(getAnimalCrossingAnalysis('1bridge2wide', plotRandom = True, title='With road and one bridge', saveRandom=True, plotfilename='Results/WithRoadAnd01Bridges2wide')))
+# print('\n One bridge 2 wide:')
+# print(str(getAnimalCrossingAnalysis('1bridge2wide', plotRandom = True, title='With road and one bridge', saveRandom=True, plotfilename='Results/WithRoadAnd01Bridges2wide')))
 
 # print('\n Two bridges 2 wide:')
 # print(str(getAnimalCrossingAnalysis('2bridge2wide', plotRandom = True, title='With road and two bridges', saveRandom=True, plotfilename='Results/WithRoadAnd02Bridges2wide')))
@@ -198,5 +227,5 @@ print(str(getAnimalCrossingAnalysis('1bridge2wide', plotRandom = True, title='Wi
 # print('\n Five bridges 2 wide:')
 # print(str(getAnimalCrossingAnalysis('5bridge2wide', plotRandom = True, title='With road and five bridges', saveRandom=True, plotfilename='Results/WithRoadAnd05Bridges2wide')))
 
-print('\n Ten bridges 2 wide:')
-print(str(getAnimalCrossingAnalysis('10bridge2wide', skip=17, plotRandom = True, title='With road and ten bridges', saveRandom=True, plotfilename='Results/WithRoadAnd10Bridges2wide')))
+# print('\n Ten bridges 2 wide:')
+# print(str(getAnimalCrossingAnalysis('10bridge2wide', skip=17, plotRandom = True, title='With road and ten bridges', saveRandom=True, plotfilename='Results/WithRoadAnd10Bridges2wide')))
