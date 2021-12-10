@@ -46,6 +46,7 @@ def plotRandomA(A, runs, saveRandom, plotfilename, title, delay):
         plt.show()
 
 def getSteadyStateDelay(A, runs):
+    varMax = 10
     meanSteadyStateA = getNoRoadData()[0]
     delay = np.zeros(runs)
     intervall = 200
@@ -54,8 +55,9 @@ def getSteadyStateDelay(A, runs):
         steadyStateDelay = np.inf
         for i in range(2001-intervall+1):
             meanA = np.mean(A[j,i:i+intervall])
-            if meanA > fraction*meanSteadyStateA:
-                steadyStateDelay = i+intervall/2
+            varA = np.var(A[j,i:i+intervall])
+            if meanA > fraction*meanSteadyStateA and varA < varMax:
+                steadyStateDelay = i
                 break
         delay[j] = steadyStateDelay
     if (delay == np.inf).any():
@@ -204,5 +206,5 @@ print(str(getAnimalCrossingAnalysis('1bridge2wide', plotRandom = True, title='Wi
 # print('\n Five bridges 2 wide:')
 # print(str(getAnimalCrossingAnalysis('5bridge2wide', plotRandom = True, title='With road and five bridges', saveRandom=True, plotfilename='Results/WithRoadAnd05Bridges2wide')))
 
-# print('\n Ten bridges 2 wide:')
-# print(str(getAnimalCrossingAnalysis('10bridge2wide', skip=17, plotRandom = True, title='With road and ten bridges', saveRandom=True, plotfilename='Results/WithRoadAnd10Bridges2wide')))
+print('\n Ten bridges 2 wide:')
+print(str(getAnimalCrossingAnalysis('10bridge2wide', skip=17, plotRandom = True, title='With road and ten bridges', saveRandom=True, plotfilename='Results/WithRoadAnd10Bridges2wide')))
