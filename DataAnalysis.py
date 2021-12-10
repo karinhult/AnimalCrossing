@@ -46,25 +46,15 @@ def plotRandomA(A, runs, saveRandom, plotfilename, title, delay):
         plt.show()
 
 def getSteadyStateDelay(A, runs):
-    varMax = 10
-    meanSteadyStateA = getNoRoadData()[0]
-    delay = np.zeros(runs)
-    intervall = 200
-    fraction = 0.9
-    for j in range(runs):
-        steadyStateDelay = np.inf
-        for i in range(2001-intervall+1):
-            meanA = np.mean(A[j,i:i+intervall])
-            varA = np.var(A[j,i:i+intervall])
-            if meanA > fraction*meanSteadyStateA and varA < varMax:
-                steadyStateDelay = i
-                break
-        delay[j] = steadyStateDelay
-    if (delay == np.inf).any():
-        return np.inf, np.nan
-    meanDelay = np.mean(delay)
-    stdDelay = np.sqrt(np.var(delay))
-    return meanDelay, stdDelay
+    varMax = 2
+    interval = 200
+
+    meanRun = np.mean(A, axis=0)
+    for i, window in enumerate(np.lib.stride_tricks.sliding_window_view(meanRun, interval)):
+        if np.var(window) < varMax:
+            return i
+
+    return np.nan # Only occurs if no value is found
 
 def getNoRoadData(runs = 20, plotRandom = False, saveRandom = False, plotfilename = '', title = ''):
     directoryName = 'Results/' + 'noRoadAndNoBridge/'
@@ -93,19 +83,21 @@ def getRoadData(runs = 20, plotRandom = False, saveRandom = False, plotfilename 
     initialFileName = directoryName + 'road_'
     A = getData(runs, initialFileName)
     meanA, stdMeanA, meanStdA = getMeanAndStandardDeviations(A, runs)
-    meanDelay, stdDelay = getSteadyStateDelay(A, runs)
+    # meanDelay, stdDelay = getSteadyStateDelay(A, runs)
+    delay = getSteadyStateDelay(A, runs)
     if plotRandom:
-        plotRandomA(A, runs, saveRandom, plotfilename, title, meanDelay)
-    return meanA, stdMeanA, meanStdA, meanDelay, stdDelay
+        plotRandomA(A, runs, saveRandom, plotfilename, title, delay)
+    return meanA, stdMeanA, meanStdA, delay
 
 def getAnimalCrossingAnalysis(directoryName, runs = 20, plotRandom = False, saveRandom = False, plotfilename = '', title = '', skip=16):
     initialFileName = 'Results/' + directoryName + '/roadAndCrossings_'
     A = getData(runs, initialFileName, skip=skip)
     meanA, stdMeanA, meanStdA = getMeanAndStandardDeviations(A, runs)
-    meanDelay, stdDelay = getSteadyStateDelay(A, runs)
+    # meanDelay, stdDelay = getSteadyStateDelay(A, runs)
+    delay = getSteadyStateDelay(A, runs)
     if plotRandom:
-        plotRandomA(A, runs, saveRandom, plotfilename, title, meanDelay)
-    return meanA, stdMeanA, meanStdA, meanDelay, stdDelay
+        plotRandomA(A, runs, saveRandom, plotfilename, title, delay)
+    return meanA, stdMeanA, meanStdA, delay
 
 plt.rcParams["font.family"] = "Times New Roman"
 plt.rcParams["font.size"] = 12
