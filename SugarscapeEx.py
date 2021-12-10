@@ -116,11 +116,24 @@ hasRoad = True
 oneSide = True
 hasCrossings = True
 n=1
-bridgeIndices = np.append(np.arange(L/4-n/2+1, L/4+n/2+1), np.arange(3*L/4-n/2+1, 3*L/4+n/2+1)).astype(int)
+#bridgeIndices = np.append(np.arange(L/4-n/2+1, L/4+n/2+1), np.arange(3*L/4-n/2+1, 3*L/4+n/2+1)).astype(int)
 #bridgeIndices = np.arange(L/2-n/2+1, L/2+n/2+1).astype(int) # np.array([L/2]).astype(int), np.array([L/3, 2*L/3]).astype(int), np.array([L/4, 2*L/4, 3*L/4]).astype(int), np.array([L/6, 2*L/6, 3*L/6, 4*L/6, 5*L/6]).astype(int), np.array([L/11, 2*L/11, 3*L/11, 4*L/11, 5*L/11, 6*L/11, 7*L/11, 8*L/11, 9*L/11, 10*L/11]).astype(int)
-tunnelIndices = np.array([]).astype(int)
+#tunnelIndices = np.array([]).astype(int)
 saveDataToFile = False
 animateSimulation = True
+bridgeIndices = np.array([]).astype(int)
+'''
+np.array([L/2-1, L/2]).astype(int)
+np.array([L/3-1, L/3, 2*L/3, 2*L/3+1]).astype(int)
+np.array([L/4-1, L/4, 2*L/4-1, 2*L/4, 3*L/4, 3*L/4+1]).astype(int)
+np.array([L/6-1, L/6, 2*L/6-1, 2*L/6, 3*L/6-1, 3*L/6, 4*L/6, 4*L/6+1, 5*L/6, 5*L/6+1]).astype(int)
+np.array([L/11-1, L/11, 2*L/11-1, 2*L/11, 3*L/11-1, 3*L/11, 4*L/11-1, 4*L/11, 5*L/11-1, 5*L/11, 
+            6*L/11, 6*L/11+1, 7*L/11, 7*L/11+1, 8*L/11, 8*L/11+1, 9*L/11, 9*L/11+1, 10*L/11, 10*L/11+1]).astype(int)
+'''
+tunnelIndices = np.array([L/11-1, L/11, 2*L/11-1, 2*L/11, 3*L/11-1, 3*L/11, 4*L/11-1, 4*L/11, 5*L/11-1, 5*L/11,
+            6*L/11, 6*L/11+1, 7*L/11, 7*L/11+1, 8*L/11, 8*L/11+1, 9*L/11, 9*L/11+1, 10*L/11, 10*L/11+1]).astype(int)
+saveDataToFile = True
+animateSimulation = False
 
 
 if saveDataToFile:
