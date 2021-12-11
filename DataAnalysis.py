@@ -165,14 +165,15 @@ def getAnimalCrossingAnalysis(filename, directoryName, runs = 20, plotRandom = F
     delay = getInflectionPoint(A)
     if plotRandom:
         plotRandomA(A, runs, saveRandom, topDirectory, plotfilename, title, delay)
-    return meanA, stdMeanA, meanStdA, delay
+    return meanA, stdMeanA, meanStdA, delay, 0
 
 plt.rcParams["font.family"] = "Times New Roman"
 plt.rcParams["font.size"] = 12
 
 if len(sys.argv) >= 2:
-    print(f'\n{sys.argv[2]}:')
-    print(str(getAnimalCrossingAnalysis(sys.argv[4], sys.argv[1], runs = 100, plotRandom = True, title=sys.argv[2], saveRandom=True, plotfilename=f'{sys.argv[1]}', skip=int(sys.argv[3]), topDirectory='100runResults')))
+    #print(f'\n{sys.argv[2]}:')
+    print(getAnimalCrossingAnalysis(sys.argv[4], sys.argv[1], runs = 100, plotRandom = True, title=sys.argv[2], saveRandom=True, plotfilename=f'{sys.argv[1]}', skip=int(sys.argv[3]), topDirectory='100runResults'))
+    #print(getAnimalCrossingAnalysis(sys.argv[1], runs = 100, plotRandom = True, title=sys.argv[2], saveRandom=True, plotfilename=f'100runResults/{sys.argv[1]}', skip=int(sys.argv[3]), topDirectory='100runResults'))
 
 # print(str(getAnimalCrossingAnalysis('1x2widetunnels', plotRandom = True, title='Temp', saveRandom=True, plotfilename='100runResults/1x2widetunnels', topDirectory='100runResults')))
 
