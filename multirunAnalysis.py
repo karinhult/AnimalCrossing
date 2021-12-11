@@ -1,12 +1,12 @@
 import sys
 import subprocess
+import numpy as np
 
 from numpy.core.numeric import cross
 
-procs = []
 args = [sys.executable, 'DataAnalysis.py', 0, 0, '16']
 
-def fileName(mode, crossingType, n):
+def fileName(mode, crossingType, n=''):
     if mode == 'amount':
         return f'{n}{crossingType}s'
     elif mode == 'width':
@@ -26,36 +26,53 @@ def plotTitle(mode, crossingType, n):
     elif mode == 'multi':
         return f'With road and {n} tunnels and {n} bridges'
 
+nList = (1, 2, 3, 5, 10)
+
+precisions = (0, 2, 3, 3, 0)
+
 for mode in ('amount', 'width', 'width2'):
     for crossingType in ('bridge', 'tunnel'):
-        for n in (1, 2, 3, 5, 10):
-            args[2] = fileName(mode, crossingType, n)
-            args[3] = plotTitle(mode, crossingType, n)
+        with open(f'100runResults/{fileName(mode, crossingType)}.txt', 'w') as file:
+            for i, n in enumerate(nList):
+                args[2] = fileName(mode, crossingType, n)
+                args[3] = plotTitle(mode, crossingType, n)
 
-            if mode == 'width2' and n == 10:
-                args[4] = '17'
-            else:
-                args[4] = '16'
+                if mode == 'width2' and n == 10:
+                    args[4] = '17'
+                else:
+                    args[4] = '16'
 
-            # print(args)
+                # print(args)
 
-            proc = subprocess.Popen(args)
-            procs.append(proc)
+                proc = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
 
-    for proc in procs:
-        proc.wait()
+                data = str(proc)[3:-4].split(', ')
+                data.insert(0, n)
+
+                data = [f'{float(data[i]):.{precisions[i]}f}' for i in range(len(data))]
+
+                file.write(' & '.join(data) + ' \\\\\n')
+                # output[i, 1:] = np.array(str(proc)[3:-4].split(', '), dtype=float)
+            # np.savetxt(f'100runResults/{fileName(mode, crossingType)}.csv', output)
+
+
+
 
 args[4] = '16'
 
 mode = 'multi'
-for n in (1, 2, 3, 5, 10):
-    args[2] = fileName(mode, crossingType, n)
-    args[3] = plotTitle(mode, crossingType, n)
+output = np.zeros((5, 5))
+output[:,0] = nList
+with open(f'100runResults/{fileName(mode, crossingType)}.txt', 'w') as file:
+    for i, n in enumerate(nList):
+        args[2] = fileName(mode, crossingType, n)
+        args[3] = plotTitle(mode, crossingType, n)
 
-    # print(args)
+        proc = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
 
-    proc = subprocess.Popen(args)
-    procs.append(proc)
+        data = str(proc)[3:-4].split(', ')
+        data.insert(0, n)
 
-for proc in procs:
-    proc.wait()
+        data = [f'{float(data[i]):.{precisions[i]}f}' for i in range(len(data))]
+
+        file.write(' & '.join(data) + ' \\\\\n')
