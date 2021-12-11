@@ -10,6 +10,7 @@ import csv
 from datetime import datetime
 import os
 from Population import *
+import sys
 
 
 def updateSugarArena(L, positions, sugarArena, growthRate, sproutRate, sugar_max, roadValue, roadWidth=4, hasRoad=True,
@@ -26,14 +27,14 @@ def updateSugarArena(L, positions, sugarArena, growthRate, sproutRate, sugar_max
     if hasRoad:
         sugarArena_updated = addRoad(L, roadWidth, sugarArena_updated, roadValue, tunnelIndices, bridgeIndices, tunnelValue)
     return sugarArena_updated
-
+'''
 def updateSugarLevels(positions, sugarlevels, metabolisms, visions, sugarArena):
     sugarLevels_updated = np.copy(sugarlevels)
     sugarInCell = (sugarArena[positions[:,0], positions[:,1]])[:,np.newaxis]
     sugarLevels_updated += sugarInCell - metabolisms
     survivors = np.where(sugarLevels_updated > 0)[0]
     return positions[survivors,:], visions[survivors], metabolisms[survivors], sugarLevels_updated[survivors]
-
+'''
 def initializeSugarArena(L, plantProb, globalSugarMax, roadWidth=4, roadValue=-2, hasRoad=True,
                          tunnelIndices = np.array([]), bridgeIndices = np.array([]), tunnelValue = -1):
     # For later: Add different sugar maximums in different parts of the arena?
@@ -111,34 +112,51 @@ maxSugar = 20
 roadWidth = 4
 roadValue = -2
 tunnelValue = -1
-runs = 20
+runs = 100
 hasRoad = True
 oneSide = True
 hasCrossings = True
-tunnelIndices = np.array([]).astype(int)
-'''
-np.array([L/2-1, L/2]).astype(int)
-np.array([L/3-1, L/3, 2*L/3, 2*L/3+1]).astype(int)
-np.array([L/4-1, L/4, 2*L/4-1, 2*L/4, 3*L/4, 3*L/4+1]).astype(int)
-np.array([L/6-1, L/6, 2*L/6-1, 2*L/6, 3*L/6-1, 3*L/6, 4*L/6, 4*L/6+1, 5*L/6, 5*L/6+1]).astype(int)
-np.array([L/11-1, L/11, 2*L/11-1, 2*L/11, 3*L/11-1, 3*L/11, 4*L/11-1, 4*L/11, 5*L/11-1, 5*L/11, 
-            6*L/11, 6*L/11+1, 7*L/11, 7*L/11+1, 8*L/11, 8*L/11+1, 9*L/11, 9*L/11+1, 10*L/11, 10*L/11+1]).astype(int)
-'''
-bridgeIndices = np.array([L/3-1, L/3, 2*L/3, 2*L/3+1]).astype(int)
+
+bridgeIndices = np.array([])
+tunnelIndices = np.array([])
+
+if len(sys.argv) >= 4:
+    nBridge = int(sys.argv[2])
+    nTunnel = int(sys.argv[3])
+    if sys.argv[1] == 'amount':
+        bridgeIndices = (L*np.arange(1, nBridge+1) / (nBridge+1)).astype(int)
+        tunnelIndices = (L*np.arange(1, nTunnel+1) / (nTunnel+1)).astype(int)
+    if sys.argv[1] == 'amount2':
+        bridgeIndices = np.append((L*np.arange(1, nBridge+1) / (nBridge+1)), (L*np.arange(1, nBridge+1) / (nBridge+1)+1)).astype(int)
+        tunnelIndices = np.append((L*np.arange(1, nTunnel+1) / (nTunnel+1)), (L*np.arange(1, nTunnel+1) / (nTunnel+1)+1)).astype(int)
+    elif sys.argv[1] == 'width':
+        bridgeIndices = np.arange(L/2-nBridge/2+1, L/2+nBridge/2+1).astype(int)
+        tunnelIndices = np.arange(L/2-nTunnel/2+1, L/2+nTunnel/2+1).astype(int)
+    elif sys.argv[1] == 'width2':
+        bridgeIndices = np.append(np.arange(L/4-nBridge/2+1, L/4+nBridge/2+1), np.arange(3*L/4-nBridge/2+1, 3*L/4+nBridge/2+1)).astype(int)
+        tunnelIndices = np.append(np.arange(L/4-nTunnel/2+1, L/4+nTunnel/2+1), np.arange(3*L/4-nTunnel/2+1, 3*L/4+nTunnel/2+1)).astype(int)
+    elif sys.argv[1] == 'multi':
+        if nBridge != nTunnel:
+            raise ValueError('Bridge amount and tunnel amount must be equal in multi mode')
+        bridgeIndices = (L*np.arange(1, 2*nBridge+1, 2) / (2*nBridge+1)).astype(int)
+        tunnelIndices = (L*np.arange(2, 2*nTunnel+1, 2) / (2*nTunnel+1)).astype(int)
+
 saveDataToFile = True
 animateSimulation = False
-
 
 if saveDataToFile:
     # Create target Directory
     # dd/mm/YY H:M:S
-    now = datetime.now()
-    dt_string = now.strftime("%Y-%m-%d_%H.%M.%S")
-    dirName = 'Results/' + dt_string
+    if len(sys.argv) < 5:
+        now = datetime.now()
+        dt_string = now.strftime("%Y-%m-%d_%H.%M.%S")
+        dirName = 'Results/' + dt_string
+    else:
+        dirName = f'100runResults/{sys.argv[4]}'
     os.mkdir(dirName)
     print("Directory ", dirName, " Created ")
 
-for hasRoad, hasCrossings in zip([True], [True]): #zip([False, True], [False, False])
+for hasRoad, hasCrossings in zip([True], [True]):
     for run in range(runs):
         A = A_start
         if animateSimulation:
