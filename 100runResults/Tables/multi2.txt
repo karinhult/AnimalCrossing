@@ -1,0 +1,5 @@
+1 2x & bridge/tunnel & 50.77 & 0.698 & 5.241 & 961 \\
+2 2x & bridges/tunnels & 51.01 & 0.684 & 5.356 & 975 \\
+3 2x & bridges/tunnels & 51.14 & 0.686 & 5.124 & 866 \\
+5 2x & bridges/tunnels & 51.28 & 0.621 & 5.091 & 891 \\
+10 2x & bridges/tunnels & 51.57 & 0.582 & 5.166 & 904 \\

@@ -34,11 +34,11 @@ def plotRandomA(A, runs, saveRandom, directoryname, plotfilename, title, delay):
     ax.plot(A[1, :], color='silver', label='All simulations')
     for i in range(1, runs):
         ax.plot(A[i,:], color = 'silver')
-    ax.plot(A[iBlue, :], color='tab:blue', label='Random simulation')
-    ax.plot(np.mean(A, axis=0), color='tab:orange', label='$\mu_A$')
+    ax.plot(A[iBlue, :], color='tab:blue', label='Sample simulation')
+    ax.plot(np.mean(A, axis=0), color='tab:orange', label='Mean simulation')
     # ax.plot(savgol_filter(np.mean(A, axis=0), 201, 3), color='green')
     if delay < 2001:
-        ax.plot([delay, delay], [-100, 300], color='black', linestyle = 'dashed', label='Mean delay')
+        ax.plot([delay, delay], [-100, 300], color='black', linestyle = 'dotted', label='Mean delay')
     ax.legend(loc='upper right', fontsize=10)
     ax.set_xlabel('Time')
     ax.set_ylabel('Number of agents')
@@ -55,10 +55,10 @@ def plotRandomA(A, runs, saveRandom, directoryname, plotfilename, title, delay):
     ax.plot(A[1, :], color='silver', label='All simulations')
     for i in range(1, runs):
         ax.plot(A[i, :], color='silver')
-    ax.plot(A[iBlue, :], color='tab:blue', label='Random simulation')
+    ax.plot(A[iBlue, :], color='tab:blue', label='Sample simulation')
     # ax.plot(savgol_filter(np.mean(A, axis=0), 201, 3), color='green')
     if delay < 2001:
-        ax.plot([delay, delay], [-100, 300], color='black', linestyle='dashed', label='Mean delay')
+        ax.plot([delay, delay], [-100, 300], color='black', linestyle='dotted', label='Mean delay')
     ax.legend(loc='upper right', fontsize=10)
     ax.set_xlabel('Time')
     ax.set_ylabel('Number of agents')
@@ -72,12 +72,12 @@ def plotRandomA(A, runs, saveRandom, directoryname, plotfilename, title, delay):
         plt.show()
 
     fig3, ax = plt.subplots(1, 1, figsize=(5, 4))
-    ax.plot(np.mean(A, axis=0), color='tab:blue', label='$\mu_A$')
-    ax.plot(np.mean(A, axis=0) + np.sqrt(np.var(A, axis=0)), color='silver', label='$\mu_A\pm\\sigma_A$')
+    ax.plot(np.mean(A, axis=0), color='tab:blue', label='Mean simulation')
+    ax.plot(np.mean(A, axis=0) + np.sqrt(np.var(A, axis=0)), color='silver', label='-- with std')
     ax.plot(np.mean(A, axis=0) - np.sqrt(np.var(A, axis=0)), color='silver')
     # ax.plot(savgol_filter(np.mean(A, axis=0), 201, 3), color='green')
     if delay < 2001:
-        ax.plot([delay, delay], [-100, 300], color='black', linestyle='dashed', label='Mean delay')
+        ax.plot([delay, delay], [-100, 300], color='black', linestyle='dotted', label='Mean delay')
     ax.legend(loc='upper right', fontsize=10)
     ax.set_xlabel('Time')
     ax.set_ylabel('Number of agents')
@@ -87,6 +87,31 @@ def plotRandomA(A, runs, saveRandom, directoryname, plotfilename, title, delay):
         fig3.savefig(directoryname + '/Figures/pdf/mean/' + plotfilename + '.pdf')
         fig3.savefig(directoryname + '/Figures/png/mean/' + plotfilename + '.png')
         plt.close(fig3)
+    else:
+        plt.show()
+
+    iBlue = np.random.randint(0, runs)
+    fig1, ax = plt.subplots(1, 1, figsize=(5, 4))
+    ax.plot(A[1, :], color='silver', label='All simulations')
+    for i in range(1, runs):
+        ax.plot(A[i, :], color='silver')
+    ax.plot(A[iBlue, :], color='gold', label='Sample simulation')
+    ax.plot(np.mean(A, axis=0), color='mediumblue', label='Mean simulation')
+    ax.plot(np.mean(A, axis=0) + np.sqrt(np.var(A, axis=0)), color='royalblue', linestyle='dashed', label='Mean sim. with 1 std')
+    ax.plot(np.mean(A, axis=0) - np.sqrt(np.var(A, axis=0)), color='royalblue', linestyle='dashed')
+    # ax.plot(savgol_filter(np.mean(A, axis=0), 201, 3), color='green')
+    if delay < 2001:
+        ax.plot([delay, delay], [-100, 300], color='black', linestyle='dotted', label='Mean delay')
+    ax.legend(loc='upper right', fontsize=10)
+    ax.set_xlabel('Time')
+    ax.set_ylabel('Number of agents')
+    ax.set_title(title)
+    ax.set_ylim([0, 170])
+    if saveRandom:
+        fig1.savefig(directoryname + '/Figures/pdf/standardwithstd/' + plotfilename + '.pdf')
+        fig1.savefig(directoryname + '/Figures/png/standardwithstd/' + plotfilename + '.png')
+        fig1.savefig(directoryname + '/Figures/svg/' + plotfilename + '.svg')
+        plt.close(fig1)
     else:
         plt.show()
 

@@ -22,6 +22,8 @@ def fileName(mode, crossingType='', n=''):
         return f'2x{n}wide{crossingType}s'
     elif mode == 'multi':
         return f'{n}tunnels{n}bridges'
+    elif mode == 'multi2':
+        return f'{n}tunnels{n}bridges2wide'
 
 def tabLabel(mode, crossingType='', n=''):
     if mode == 'noroad':
@@ -29,30 +31,17 @@ def tabLabel(mode, crossingType='', n=''):
     if mode == 'road':
         return 'Without crossings'
     if mode == 'amount':
-        if n==1:
-            return f'{n} {crossingType}'
-        else:
-            return f'{n} {crossingType}s'
+        return f'{n} & {crossingType}{"s" if n >= 2 else ""}'
     if mode == 'amount2':
-        if n == 1:
-            return f'{n} 2x {crossingType}'
-        else:
-            return f'{n} 2x {crossingType}s'
+        return f'{n} 2x & {crossingType}{"s" if n >= 2 else ""}'
     elif mode == 'width':
-        if n==1:
-            return f'1 {n}x {crossingType}'
-        else:
-            return f'1 {n}x {crossingType}s'
+        return f'1 {n}x & {crossingType}{"s" if n >= 2 else ""}'
     elif mode == 'width2':
-        if n == 1:
-            return f'2 {n}x {crossingType}'
-        else:
-            return f'2 {n}x {crossingType}s'
+        return f'2 {n}x & {crossingType}{"s" if n >= 2 else ""}'
     elif mode == 'multi':
-        if n==1:
-            return f'{n} tunnel/bridge'
-        else:
-            return f'{n} tunnels/bridges'
+        return f'{n} & bridge{"s" if n >= 2 else ""}/tunnel{"s" if n >= 2 else ""}'
+    elif mode == 'multi2':
+        return f'{n} 2x & bridge{"s" if n >= 2 else ""}/tunnel{"s" if n >= 2 else ""}'
 
 def plotTitle(mode, crossingType='', n=''):
     if mode == 'noroad':
@@ -68,10 +57,12 @@ def plotTitle(mode, crossingType='', n=''):
     elif mode == 'width2':
         return f'With road and two {n} wide {crossingType}s'
     elif mode == 'multi':
-        return f'With road and {n} tunnels and {n} bridges'
+        return f'With road and {n} tunnel{"s" if n >= 2 else ""} and {n} bridge{"s" if n >= 2 else ""}'
+    elif mode == 'multi2':
+        return f'With road and {n} tunnel{"s" if n >= 2 else ""} and {n} bridge{"s" if n >= 2 else ""}, 2 wide'
 
 precisions = (0, 2, 3, 3, 0)
-
+'''
 mode = 'noCrossings'
 crossingType = ''
 with open(f'100runResults/Tables/{mode}.txt', 'w') as file:
@@ -148,7 +139,6 @@ for mode in ('amount', 'amount2', 'width', 'width2'):
             # np.savetxt(f'100runResults/{fileName(mode, crossingType)}.csv', output)
 
 
-args[4] = '16'
 nList = (1, 2, 3, 5, 10)
 mode = 'multi'
 output = np.zeros((5, 5))
@@ -171,3 +161,34 @@ with open(f'100runResults/Tables/{mode}.txt', 'w') as file:
         # procs.append(proc)
         # for proci in procs:
         #    proci.wait()
+
+'''
+args[4] = '16'
+nList = (1, 2, 3, 5, 10)
+mode = 'multi2'
+output = np.zeros((5, 5))
+output[:,0] = nList
+with open(f'100runResults/Tables/{mode}.txt', 'w') as file:
+    for i, n in enumerate(nList):
+        args[2] = fileName(mode, n=n)
+        args[3] = plotTitle(mode, n=n)
+
+        if n == 10:
+            args[4] = '18'
+        else:
+            args[4] = '16'
+
+        proc = subprocess.Popen(args, stdout=subprocess.PIPE).communicate()[0]
+
+        data = str(proc)[3:-4].split(', ')
+        data.insert(0, 0)
+
+        data = [f'{float(data[j]):.{precisions[j]}f}' for j in range(len(data) - 1)]
+        data[0] = tabLabel(mode, n=n)
+
+        file.write(' & '.join(data) + ' \\\\\n')
+
+        # procs.append(proc)
+        # for proci in procs:
+        #    proci.wait()
+#'''
