@@ -10,7 +10,8 @@ import csv
 from datetime import datetime
 import os
 from Population import *
-
+import sys
+import cv2
 
 def updateSugarArena(L, positions, sugarArena, growthRate, sproutRate, sugar_max, roadValue, roadWidth=4, hasRoad=True,
                      tunnelIndices = np.array([]), bridgeIndices = np.array([]), tunnelValue = -1):
@@ -26,14 +27,14 @@ def updateSugarArena(L, positions, sugarArena, growthRate, sproutRate, sugar_max
     if hasRoad:
         sugarArena_updated = addRoad(L, roadWidth, sugarArena_updated, roadValue, tunnelIndices, bridgeIndices, tunnelValue)
     return sugarArena_updated
-
+'''
 def updateSugarLevels(positions, sugarlevels, metabolisms, visions, sugarArena):
     sugarLevels_updated = np.copy(sugarlevels)
     sugarInCell = (sugarArena[positions[:,0], positions[:,1]])[:,np.newaxis]
     sugarLevels_updated += sugarInCell - metabolisms
     survivors = np.where(sugarLevels_updated > 0)[0]
     return positions[survivors,:], visions[survivors], metabolisms[survivors], sugarLevels_updated[survivors]
-
+'''
 def initializeSugarArena(L, plantProb, globalSugarMax, roadWidth=4, roadValue=-2, hasRoad=True,
                          tunnelIndices = np.array([]), bridgeIndices = np.array([]), tunnelValue = -1):
     # For later: Add different sugar maximums in different parts of the arena?
@@ -76,7 +77,7 @@ def getImage(positions, sugarArena, A, globalSugarMax, roadValue, tunnelValue):
     image = np.zeros((width, width, 3))
     image[:,:,0] = 0 # Red soil
     image[sugarArena > 0, :] = 0
-    image[:,:,1] = (sugarArena *255 * 1.5/globalSugarMax).astype(int) # Green food
+    image[:,:,1] = (sugarArena * 255 * 0.75 /globalSugarMax).astype(int) # Green food
     image[sugarArena == tunnelValue, :] = 150
     image[sugarArena == roadValue, :] = 100
     for a in range(A):
@@ -111,41 +112,59 @@ maxSugar = 20
 roadWidth = 4
 roadValue = -2
 tunnelValue = -1
-runs = 20
+runs = 1
 hasRoad = True
 oneSide = True
 hasCrossings = True
-n=1
-#bridgeIndices = np.append(np.arange(L/4-n/2+1, L/4+n/2+1), np.arange(3*L/4-n/2+1, 3*L/4+n/2+1)).astype(int)
-#bridgeIndices = np.arange(L/2-n/2+1, L/2+n/2+1).astype(int) # np.array([L/2]).astype(int), np.array([L/3, 2*L/3]).astype(int), np.array([L/4, 2*L/4, 3*L/4]).astype(int), np.array([L/6, 2*L/6, 3*L/6, 4*L/6, 5*L/6]).astype(int), np.array([L/11, 2*L/11, 3*L/11, 4*L/11, 5*L/11, 6*L/11, 7*L/11, 8*L/11, 9*L/11, 10*L/11]).astype(int)
-#tunnelIndices = np.array([]).astype(int)
+
+bridgeIndices = np.array([])
+tunnelIndices = np.array([])
+
+if len(sys.argv) >= 4:
+    nBridge = int(sys.argv[2])
+    nTunnel = int(sys.argv[3])
+    if sys.argv[1] == 'amount':
+        bridgeIndices = (L*np.arange(1, nBridge+1) / (nBridge+1)).astype(int)
+        tunnelIndices = (L*np.arange(1, nTunnel+1) / (nTunnel+1)).astype(int)
+    if sys.argv[1] == 'amount2':
+        bridgeIndices = np.append((L*np.arange(1, nBridge+1) / (nBridge+1)), (L*np.arange(1, nBridge+1) / (nBridge+1)+1)).astype(int)
+        tunnelIndices = np.append((L*np.arange(1, nTunnel+1) / (nTunnel+1)), (L*np.arange(1, nTunnel+1) / (nTunnel+1)+1)).astype(int)
+    elif sys.argv[1] == 'width':
+        bridgeIndices = np.arange(L/2-nBridge/2+1, L/2+nBridge/2+1).astype(int)
+        tunnelIndices = np.arange(L/2-nTunnel/2+1, L/2+nTunnel/2+1).astype(int)
+    elif sys.argv[1] == 'width2':
+        bridgeIndices = np.append(np.arange(L/4-nBridge/2+1, L/4+nBridge/2+1), np.arange(3*L/4-nBridge/2+1, 3*L/4+nBridge/2+1)).astype(int)
+        tunnelIndices = np.append(np.arange(L/4-nTunnel/2+1, L/4+nTunnel/2+1), np.arange(3*L/4-nTunnel/2+1, 3*L/4+nTunnel/2+1)).astype(int)
+    elif sys.argv[1] == 'multi':
+        if nBridge != nTunnel:
+            raise ValueError('Bridge amount and tunnel amount must be equal in multi mode')
+        bridgeIndices = (L*np.arange(1, 2*nBridge+1, 2) / (2*nBridge+1)).astype(int)
+        tunnelIndices = (L*np.arange(2, 2*nTunnel+1, 2) / (2*nTunnel+1)).astype(int)
+    elif sys.argv[1] == 'multi2':
+        if nBridge != nTunnel:
+            raise ValueError('Bridge amount and tunnel amount must be equal in multi mode')
+        bridgeIndices = np.append((L*np.arange(1, 2*nBridge+1, 2) / (2*nBridge+1)), (L*np.arange(1, 2*nBridge+1, 2) / (2*nBridge+1)) + 1).astype(int)
+        tunnelIndices = np.append((L*np.arange(2, 2*nTunnel+1, 2) / (2*nTunnel+1)), (L*np.arange(2, 2*nTunnel+1, 2) / (2*nTunnel+1)) + 1).astype(int)
+
 saveDataToFile = False
 animateSimulation = True
-bridgeIndices = np.array([]).astype(int)
-'''
-np.array([L/2-1, L/2]).astype(int)
-np.array([L/3-1, L/3, 2*L/3, 2*L/3+1]).astype(int)
-np.array([L/4-1, L/4, 2*L/4-1, 2*L/4, 3*L/4, 3*L/4+1]).astype(int)
-np.array([L/6-1, L/6, 2*L/6-1, 2*L/6, 3*L/6-1, 3*L/6, 4*L/6, 4*L/6+1, 5*L/6, 5*L/6+1]).astype(int)
-np.array([L/11-1, L/11, 2*L/11-1, 2*L/11, 3*L/11-1, 3*L/11, 4*L/11-1, 4*L/11, 5*L/11-1, 5*L/11, 
-            6*L/11, 6*L/11+1, 7*L/11, 7*L/11+1, 8*L/11, 8*L/11+1, 9*L/11, 9*L/11+1, 10*L/11, 10*L/11+1]).astype(int)
-'''
-tunnelIndices = np.array([L/11-1, L/11, 2*L/11-1, 2*L/11, 3*L/11-1, 3*L/11, 4*L/11-1, 4*L/11, 5*L/11-1, 5*L/11,
-            6*L/11, 6*L/11+1, 7*L/11, 7*L/11+1, 8*L/11, 8*L/11+1, 9*L/11, 9*L/11+1, 10*L/11, 10*L/11+1]).astype(int)
-saveDataToFile = True
-animateSimulation = False
-
+save_snapshot = False
+t_snapshot_list = []
+record = True
 
 if saveDataToFile:
     # Create target Directory
     # dd/mm/YY H:M:S
-    now = datetime.now()
-    dt_string = now.strftime("%Y-%m-%d_%H.%M.%S")
-    dirName = 'Results/' + dt_string
+    if len(sys.argv) < 5:
+        now = datetime.now()
+        dt_string = now.strftime("%Y-%m-%d_%H.%M.%S")
+        dirName = 'Results/' + dt_string
+    else:
+        dirName = f'100runResults/{sys.argv[4]}'
     os.mkdir(dirName)
     print("Directory ", dirName, " Created ")
 
-for hasRoad, hasCrossings in zip([False], [False]): #zip([False, True], [False, False])
+for hasRoad, hasCrossings in zip([False], [False]): #zip([False, True], [False, False]):
     for run in range(runs):
         A = A_start
         if animateSimulation:
@@ -197,8 +216,21 @@ for hasRoad, hasCrossings in zip([False], [False]): #zip([False, True], [False, 
         born_list = []
         born = 0
         tot_dead = sum(dead_list)
-        while t<2e3:
+        imageDelay = 0.2
+        nFigRec = 80
+        if record:
+            if hasRoad and hasCrossings:
+                t_max = 1.1e3
+            elif hasRoad:
+                t_max = 6e2
+            else:
+                t_max = 1e3
+        else:
+            t_max = 2e3
+        while t<t_max:
             t += 1
+            if t == 20:
+                imageDelay = 0.01
             if animateSimulation:
                 image = getImage(population.positions, sugarArena_t, A, globalSugarMax, roadValue, tunnelValue)
                 img = itk.PhotoImage(Image.fromarray(np.uint8(image),'RGB').resize((res, res), resample=Image.BOX))
@@ -206,6 +238,33 @@ for hasRoad, hasCrossings in zip([False], [False]): #zip([False, True], [False, 
                 tk.title(f'Time: {t}. Agents: {A}. Dead: {tot_dead}. Last born: {born}')
                 time.sleep(imageDelay)
                 tk.update()
+                if save_snapshot and t in t_snapshot_list:
+                    filename = 'Presentation/animalcrossing_t' + str(int(t)) + '.png'
+                    img._PhotoImage__photo.write(filename)
+                if record:
+                    directory = 'Presentation/Videos'
+                    filename = 'animalcrossing.png'
+                    img._PhotoImage__photo.write(directory + '/' + filename)
+                    image_path = os.path.join(directory, filename)
+                    frame = cv2.imread(image_path)
+                    if t==1:
+                        height, width, channels = frame.shape
+                        fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Be sure to use lower case
+                        if hasRoad and hasCrossings:
+                            nFigRec = 1
+                            videofilename = 'Presentation/Videos/Crossings.mp4'
+                        elif hasRoad:
+                            nFigRec = 1
+                            videofilename = 'Presentation/Videos/Road.mp4'
+                        else:
+                            videofilename = 'Presentation/Videos/NoRoad.mp4'
+                        out = cv2.VideoWriter(videofilename, fourcc, 40.0, (width, height))
+                    if t==2 and not hasRoad:
+                        nFigRec = 12
+                    if t==20:
+                        nFigRec = 1
+                    for iRec in range(nFigRec):
+                        out.write(frame)
 
             # population.updatePositions(sugarArena_t, roadValue)
             if hasCrossings:
@@ -230,6 +289,11 @@ for hasRoad, hasCrossings in zip([False], [False]): #zip([False, True], [False, 
             A = len(population.prey)
             A_list.append(A)
             tot_dead = sum(dead_list)
+
+        if record:
+            out.release()
+            cv2.destroyAllWindows()
+
         if animateSimulation:
             tk.destroy()
             Tk.mainloop(canvas)

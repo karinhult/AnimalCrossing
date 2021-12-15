@@ -1,0 +1,5 @@
+1 & bridge/tunnel & 50.57 & 0.693 & 5.425 & 961 \\
+2 & bridges/tunnels & 50.98 & 0.658 & 5.295 & 923 \\
+3 & bridges/tunnels & 51.14 & 0.631 & 5.173 & 907 \\
+5 & bridges/tunnels & 51.17 & 0.654 & 5.169 & 941 \\
+10 & bridges/tunnels & 51.46 & 0.600 & 4.986 & 835 \\
