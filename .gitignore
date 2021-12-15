@@ -1,6 +1,4 @@
 *Test*
 *test*
 __pycache__
-Results/Figures/*
-100runResults/Figures/*
-Presentation/*
+*.pdf
